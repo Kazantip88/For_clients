@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Client — Trusted Novus Bank Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-900: #0D2B1E;
+      --green-800: #1B4332;
+      --green-700: #2D6A4F;
+      --green-500: #40916C;
+      --green-400: #52B788;
+      --green-100: #D8F3DC;
+      --green-50:  #F0FAF4;
+      --accent:    #4CAF7D;
+      --gold:      #C8A951;
+      --red:       #D64045;
+      --red-bg:    #FFF0F0;
+      --grey-900:  #111827;
+      --grey-700:  #374151;
+      --grey-500:  #6B7280;
+      --grey-300:  #D1D5DB;
+      --grey-100:  #F3F4F6;
+      --white:     #FFFFFF;
+      --radius:    12px;
+      --radius-sm: 8px;
+      --shadow:    0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,.14);
+    }
+    html, body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--grey-100);
+      color: var(--grey-900);
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--green-800);
+      color: white;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .topbar-logo { display: flex; align-items: center; gap: 10px; }
+    .topbar-title { font-size: 15px; font-weight: 700; }
+    .topbar-sub { font-size: 9px; opacity: .65; letter-spacing: .12em; display: block; }
+    .admin-badge {
+      background: var(--gold); color: white;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 4px;
+      letter-spacing: .05em;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .back-btn {
+      background: rgba(255,255,255,.15);
+      color: white; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 500;
+      padding: 7px 14px; border-radius: 6px;
+      display: flex; align-items: center; gap: 6px;
+      transition: background .15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.25); }
+
+    /* ── LAYOUT ── */
+    .page-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 28px 16px 60px;
+    }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 22px; font-weight: 700; }
+    .page-header p { font-size: 14px; color: var(--grey-500); margin-top: 4px; }
+
+    /* two-column on desktop, single on mobile */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    .col-span-2 { grid-column: span 2; }
+    @media (max-width: 600px) {
+      .col-span-2 { grid-column: span 1; }
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 14px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--grey-500);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--grey-100);
+    }
+
+    /* ── FORM ── */
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; font-weight: 500; color: var(--grey-700); }
+    .form-label span { color: var(--red); margin-left: 2px; }
+    .form-input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--grey-300);
+      border-radius: var(--radius-sm);
+      font-size: 14px; color: var(--grey-900);
+      background: var(--white);
+      transition: border-color .15s, box-shadow .15s;
+      appearance: none;
+      font-family: inherit;
+    }
+    .form-input:focus {
+      border-color: var(--green-500);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(64,145,108,.12);
+    }
+    .form-input.error { border-color: var(--red); }
+    .form-input-wrap { position: relative; }
+    .form-input-wrap .form-input { padding-right: 44px; }
+    .form-eye {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--grey-400); padding: 0;
+      display: flex; align-items: center;
+    }
+    .form-hint { font-size: 11px; color: var(--grey-500); }
+    .form-error { font-size: 12px; color: var(--red); display: none; }
+    .form-error.show { display: block; }
+    .form-select {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--grey-300);
+      border-radius: var(--radius-sm);
+      font-size: 14px; color: var(--grey-900);
+      background: var(--white);
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color .15s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+    .form-select:focus { border-color: var(--green-500); outline: none; }
+
+    /* currency/amount row */
+    .amount-wrap { display: flex; gap: 0; }
+    .amount-prefix {
+      background: var(--grey-100);
+      border: 1.5px solid var(--grey-300);
+      border-right: none;
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+      padding: 0 12px;
+      font-size: 14px; font-weight: 600;
+      color: var(--grey-500);
+      display: flex; align-items: center;
+      white-space: nowrap;
+    }
+    .amount-wrap .form-input {
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      flex: 1;
+    }
+
+    /* account type toggle */
+    .type-toggle {
+      display: flex;
+      background: var(--grey-100);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+    .type-btn {
+      flex: 1; padding: 9px 8px;
+      border: none; cursor: pointer;
+      border-radius: 6px;
+      font-size: 13px; font-weight: 500;
+      color: var(--grey-500);
+      background: none;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .type-btn.active {
+      background: var(--white);
+      color: var(--grey-900);
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+
+    /* account rows */
+    .account-rows { display: flex; flex-direction: column; gap: 10px; }
+    .account-row {
+      border: 1.5px solid var(--grey-200);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      position: relative;
+      background: var(--grey-100);
+    }
+    .account-row-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .account-row-label {
+      font-size: 13px; font-weight: 600;
+      color: var(--grey-700);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .remove-acc {
+      background: none; border: none; cursor: pointer;
+      color: var(--grey-400); font-size: 16px;
+      padding: 2px 6px; border-radius: 4px;
+      transition: all .15s;
+    }
+    .remove-acc:hover { color: var(--red); background: var(--red-bg); }
+    .acc-type-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .acc-type-dot.current { background: var(--green-500); }
+    .acc-type-dot.savings { background: #3B82F6; }
+    .acc-type-dot.crypto { background: #8B5CF6; }
+
+    .add-account-btn {
+      width: 100%; padding: 11px;
+      border: 1.5px dashed var(--grey-300);
+      border-radius: var(--radius-sm);
+      background: none; cursor: pointer;
+      font-size: 13px; font-weight: 500;
+      color: var(--green-700);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .add-account-btn:hover { border-color: var(--green-500); background: var(--green-50); }
+
+    /* crypto addr */
+    .crypto-info {
+      background: rgba(139,92,246,.06);
+      border: 1px solid rgba(139,92,246,.15);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .crypto-info-title { font-size: 12px; font-weight: 600; color: #5B21B6; margin-bottom: 8px; }
+    .crypto-addr-row {
+      display: flex; gap: 8px; align-items: center;
+      margin-bottom: 6px;
+    }
+    .crypto-addr-row:last-child { margin-bottom: 0; }
+    .crypto-coin-label {
+      width: 44px; flex-shrink: 0;
+      font-size: 11px; font-weight: 700;
+      color: #5B21B6;
+    }
+    .crypto-addr-input {
+      flex: 1; padding: 7px 10px;
+      border: 1px solid rgba(139,92,246,.2);
+      border-radius: 6px;
+      font-size: 12px; font-family: monospace;
+      color: var(--grey-700);
+      background: white;
+    }
+    .crypto-addr-input:focus { outline: none; border-color: #8B5CF6; }
+
+    /* preview panel */
+    .preview-card {
+      position: sticky; top: 72px;
+    }
+    .preview-empty {
+      text-align: center; padding: 30px 16px;
+      color: var(--grey-400);
+      font-size: 13px;
+    }
+    .preview-empty svg { opacity: .3; display: block; margin: 0 auto 10px; }
+    .preview-user { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .preview-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--green-700); color: white;
+      font-size: 16px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .preview-name { font-size: 16px; font-weight: 700; }
+    .preview-username { font-size: 12px; color: var(--grey-500); margin-top: 2px; }
+    .preview-account {
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 8px;
+      color: white;
+      font-size: 13px;
+    }
+    .preview-account.current { background: linear-gradient(135deg, var(--green-800), var(--green-700)); }
+    .preview-account.savings { background: linear-gradient(135deg, #1a3a5c, #2563a8); }
+    .preview-account.crypto  { background: linear-gradient(135deg, #2d1b4e, #5b21b6); }
+    .preview-acc-type { font-size: 10px; opacity: .7; text-transform: uppercase; letter-spacing: .08em; }
+    .preview-acc-balance { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+    /* ── SUBMIT ── */
+    .submit-row {
+      display: flex; gap: 12px; align-items: center;
+      margin-top: 8px;
+    }
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 24px; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: all .15s; font-family: inherit;
+    }
+    .btn-primary { background: var(--green-700); color: white; }
+    .btn-primary:hover { background: var(--green-800); }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-primary:disabled { background: var(--grey-300); color: var(--grey-500); cursor: not-allowed; transform: none; }
+    .btn-outline {
+      background: none; color: var(--grey-700);
+      border: 1.5px solid var(--grey-300);
+    }
+    .btn-outline:hover { background: var(--grey-100); }
+
+    /* ── TOAST ── */
+    .toast-wrap {
+      position: fixed; top: 68px; left: 50%; transform: translateX(-50%);
+      z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+      min-width: 280px;
+    }
+    .toast {
+      padding: 12px 18px; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 500; color: white;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: var(--shadow-lg);
+      animation: slideDown .2s ease;
+    }
+    .toast.success { background: var(--green-700); }
+    .toast.error   { background: var(--red); }
+    @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── SUCCESS SCREEN ── */
+    .success-screen {
+      text-align: center; padding: 40px 20px;
+    }
+    .success-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--green-100); color: var(--green-700);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; font-size: 32px;
+    }
+    .success-screen h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .success-screen p { font-size: 14px; color: var(--grey-500); margin-bottom: 24px; }
+    .credentials-box {
+      background: var(--grey-100); border-radius: var(--radius-sm);
+      padding: 16px; text-align: left; margin-bottom: 20px;
+    }
+    .cred-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--grey-200); }
+    .cred-row:last-child { border: none; }
+    .cred-label { font-size: 12px; color: var(--grey-500); }
+    .cred-value { font-size: 13px; font-weight: 600; font-family: monospace; }
+
+    /* ── SPINNER ── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg width="26" height="26" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="16" fill="rgba(255,255,255,.12)"/>
+      <path d="M20 8C13.4 8 8 13.4 8 20C8 26.6 13.4 32 20 32C26.6 32 32 26.6 32 20" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <path d="M20 12V28M14 16H26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <span class="topbar-title">TRUSTED NOVUS BANK</span>
+      <span class="topbar-sub">ADMIN PORTAL</span>
+    </div>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div class="topbar-right">
+    <span id="admin-name" style="font-size:13px;opacity:.8"></span>
+    <button class="back-btn" onclick="window.location.href='index.html'">
+      ← Back to App
+    </button>
+    <button class="back-btn" id="logout-btn" style="background:rgba(214,64,69,.3)">Sign Out</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- PAGE -->
+<div class="page-wrap" id="main-content">
+
+  <!-- PAGE HEADER with tabs -->
+  <div class="page-header">
+    <h1>Client Management</h1>
+    <p>Register new clients and manage existing accounts.</p>
+  </div>
+
+  <!-- TAB NAV -->
+  <div style="display:flex;gap:4px;margin-bottom:24px;border-bottom:2px solid var(--grey-200);padding-bottom:0">
+    <button class="tab-link active" data-tab="register" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--green-700);border-bottom:2px solid var(--green-700);margin-bottom:-2px;font-family:inherit">
+      Register Client
+    </button>
+    <button class="tab-link" data-tab="clients" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--grey-500);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit">
+      All Clients
+    </button>
+  </div>
+
+  <!-- TAB: REGISTER -->
+  <div id="tab-register">
+    <div class="grid-2" id="register-form-grid">
+
+      <!-- LEFT: Form -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- Personal Info -->
+        <div class="card">
+          <div class="card-title">👤 Personal Info</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;gap:12px">
+              <div class="form-group" style="flex:1">
+                <label class="form-label">First Name <span>*</span></label>
+                <input class="form-input" id="f-fname" placeholder="John" oninput="updatePreview()" />
+                <span class="form-error" id="err-fname">Required</span>
+              </div>
+              <div class="form-group" style="flex:1">
+                <label class="form-label">Last Name <span>*</span></label>
+                <input class="form-input" id="f-lname" placeholder="Smith" oninput="updatePreview()" />
+                <span class="form-error" id="err-lname">Required</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address <span>*</span></label>
+              <input class="form-input" id="f-email" type="email" placeholder="john.smith@example.com" />
+              <span class="form-error" id="err-email">Enter a valid email</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone (optional)</label>
+              <input class="form-input" id="f-phone" type="tel" placeholder="+350 200 12345" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Login Credentials -->
+        <div class="card">
+          <div class="card-title">🔐 Login Credentials</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="form-group">
+              <label class="form-label">Username <span>*</span></label>
+              <input class="form-input" id="f-user" placeholder="john.smith" autocomplete="off" oninput="updatePreview()" />
+              <span class="form-hint">Lowercase letters, numbers and dots only</span>
+              <span class="form-error" id="err-user">Username is required</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Temporary Password <span>*</span></label>
+              <div class="form-input-wrap">
+                <input class="form-input" id="f-pass" type="password" placeholder="Min. 8 characters" autocomplete="new-password" />
+                <button class="form-eye" id="eye-pass" type="button">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <span class="form-hint">Client must change password after first login.</span>
+              <span class="form-error" id="err-pass">Min. 8 characters</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer" id="admin-toggle">
+              <div id="admin-check" style="width:18px;height:18px;border-radius:4px;border:1.5px solid var(--grey-300);background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s"></div>
+              <div>
+                <div style="font-size:14px;font-weight:500">Grant Admin Access</div>
+                <div style="font-size:12px;color:var(--grey-500)">Can manage clients and credit/debit accounts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accounts -->
+        <div class="card">
+          <div class="card-title">💳 Accounts</div>
+          <div class="account-rows" id="accounts-container"></div>
+          <button class="add-account-btn" id="add-account-btn" style="margin-top:10px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Another Account
+          </button>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-row">
+          <button class="btn btn-primary" id="submit-btn" style="flex:1">
+            Register Client
+          </button>
+          <button class="btn btn-outline" onclick="resetForm()">Clear</button>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Preview -->
+      <div>
+        <div class="card preview-card">
+          <div class="card-title">👁 Live Preview</div>
+          <div id="preview-content">
+            <div class="preview-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Start filling the form to see a preview
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB: ALL CLIENTS -->
+  <div id="tab-clients" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="loadClients()" style="gap:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div id="clients-list">
+      <div style="text-align:center;padding:40px;color:var(--grey-400);font-size:14px">Loading clients...</div>
+    </div>
+  </div>
+
+</div><!-- end page-wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG & STATE
+// ═══════════════════════════════════════════════════════
+const API = 'http://localhost:4000/api';
+let token = localStorage.getItem('tnb_token');
+let user  = JSON.parse(localStorage.getItem('tnb_user') || 'null');
+
+// Check auth
+if (!token || !user) { window.location.href = 'index.html'; }
+
+// Display admin name
+document.getElementById('admin-name').textContent = user ? `${user.firstName} ${user.lastName}` : '';
+
+// Logout
+document.getElementById('logout-btn').onclick = () => {
+  localStorage.removeItem('tnb_token');
+  localStorage.removeItem('tnb_user');
+  window.location.href = 'index.html';
+};
+
+// Currencies + cryptos
+const FIAT = ['GBP', 'USD', 'EUR', 'CHF'];
+const CRYPTOS = ['BTC', 'ETH', 'USDT'];
+const TYPE_LABELS = { current: 'Current Account', savings: 'Savings Account', crypto: 'Crypto Account' };
+
+// Crypto addresses (bank's deposit addresses)
+const CRYPTO_ADDRS = {
+  BTC:  '1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf9n',
+  ETH:  '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+  USDT: 'TN3W8e4BKMBK4K3nKzMr4jGxQMm3cVKgXj',
+};
+
+// Account rows state
+let accountRows = [];
+let isAdmin = false;
+let nextRowId = 1;
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  // Default: one current account
+  addAccountRow('current');
+
+  // Admin toggle
+  document.getElementById('admin-toggle').onclick = () => {
+    isAdmin = !isAdmin;
+    const box = document.getElementById('admin-check');
+    box.style.background = isAdmin ? 'var(--green-700)' : 'white';
+    box.style.borderColor = isAdmin ? 'var(--green-700)' : 'var(--grey-300)';
+    box.innerHTML = isAdmin ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>` : '';
+  };
+
+  // Password eye toggle
+  document.getElementById('eye-pass').onclick = () => {
+    const p = document.getElementById('f-pass');
+    p.type = p.type === 'password' ? 'text' : 'password';
+  };
+
+  // Add account
+  document.getElementById('add-account-btn').onclick = () => {
+    if (accountRows.length >= 5) { showToast('Maximum 5 accounts per client', 'error'); return; }
+    addAccountRow('savings');
+  };
+
+  // Submit
+  document.getElementById('submit-btn').onclick = submitForm;
+
+  // Tabs
+  document.querySelectorAll('.tab-link').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tab-link').forEach(b => {
+        b.style.color = 'var(--grey-500)';
+        b.style.borderBottomColor = 'transparent';
+        b.style.fontWeight = '500';
+      });
+      btn.style.color = 'var(--green-700)';
+      btn.style.borderBottomColor = 'var(--green-700)';
+      btn.style.fontWeight = '600';
+      document.getElementById('tab-register').style.display = btn.dataset.tab === 'register' ? '' : 'none';
+      document.getElementById('tab-clients').style.display  = btn.dataset.tab === 'clients'  ? '' : 'none';
+      if (btn.dataset.tab === 'clients') loadClients();
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// ACCOUNT ROWS
+// ═══════════════════════════════════════════════════════
+function addAccountRow(type = 'current') {
+  const id = nextRowId++;
+  accountRows.push({ id, type, currency: 'GBP', balance: '', cryptoAddrs: { ...CRYPTO_ADDRS } });
+  renderAccountRows();
+  updatePreview();
+}
+
+function removeAccountRow(id) {
+  accountRows = accountRows.filter(r => r.id !== id);
+  renderAccountRows();
+  updatePreview();
+}
+
+function renderAccountRows() {
+  const container = document.getElementById('accounts-container');
+  if (accountRows.length === 0) {
+    container.innerHTML = `<p style="font-size:13px;color:var(--grey-400);text-align:center;padding:12px 0">No accounts yet. Click "Add Another Account".</p>`;
+    return;
+  }
+  container.innerHTML = accountRows.map(row => renderAccountRow(row)).join('');
+
+  // Bind events for each row
+  accountRows.forEach(row => {
+    // Type buttons
+    ['current', 'savings', 'crypto'].forEach(t => {
+      const btn = document.getElementById(`type-${t}-${row.id}`);
+      if (btn) btn.onclick = () => {
+        accountRows.find(r => r.id === row.id).type = t;
+        if (t !== 'crypto') accountRows.find(r => r.id === row.id).currency = 'GBP';
+        renderAccountRows();
+        updatePreview();
+      };
+    });
+
+    // Currency select
+    const cur = document.getElementById(`cur-${row.id}`);
+    if (cur) cur.onchange = (e) => {
+      accountRows.find(r => r.id === row.id).currency = e.target.value;
+      updatePreview();
+    };
+
+    // Balance input
+    const bal = document.getElementById(`bal-${row.id}`);
+    if (bal) bal.oninput = (e) => {
+      accountRows.find(r => r.id === row.id).balance = e.target.value;
+      updatePreview();
+    };
+
+    // Crypto addr inputs
+    CRYPTOS.forEach(coin => {
+      const el = document.getElementById(`addr-${coin}-${row.id}`);
+      if (el) el.oninput = (e) => {
+        accountRows.find(r => r.id === row.id).cryptoAddrs[coin] = e.target.value;
+      };
+    });
+
+    // Remove
+    const rm = document.getElementById(`rm-${row.id}`);
+    if (rm) rm.onclick = () => removeAccountRow(row.id);
+  });
+}
+
+function renderAccountRow(row) {
+  const dotClass = `acc-type-dot ${row.type}`;
+  const isCrypto = row.type === 'crypto';
+
+  return `
+    <div class="account-row" id="row-${row.id}">
+      <div class="account-row-header">
+        <span class="account-row-label">
+          <span class="${dotClass}"></span>
+          ${TYPE_LABELS[row.type]}
+        </span>
+        ${accountRows.length > 1 ? `<button class="remove-acc" id="rm-${row.id}" title="Remove">✕</button>` : ''}
+      </div>
+
+      <!-- Type toggle -->
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;font-weight:500;color:var(--grey-500);margin-bottom:6px">Account Type</div>
+        <div class="type-toggle">
+          <button class="type-btn ${row.type === 'current' ? 'active' : ''}" id="type-current-${row.id}">💳 Current</button>
+          <button class="type-btn ${row.type === 'savings' ? 'active' : ''}" id="type-savings-${row.id}">🏦 Savings</button>
+          <button class="type-btn ${row.type === 'crypto'  ? 'active' : ''}" id="type-crypto-${row.id}">₿ Crypto</button>
+        </div>
+      </div>
+
+      ${isCrypto ? renderCryptoFields(row) : renderFiatFields(row)}
+    </div>
+  `;
+}
+
+function renderFiatFields(row) {
+  return `
+    <div style="display:flex;gap:10px">
+      <div class="form-group" style="flex:0 0 90px">
+        <label style="font-size:12px;font-weight:500;color:var(--grey-500);margin-bottom:5px;display:block">Currency</label>
+        <select class="form-select" id="cur-${row.id}" style="padding:10px 28px 10px 10px;font-size:13px">
+          ${FIAT.map(c => `<option value="${c}" ${c === row.currency ? 'selected' : ''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label style="font-size:12px;font-weight:500;color:var(--grey-500);margin-bottom:5px;display:block">Opening Balance</label>
+        <div class="amount-wrap">
+          <span class="amount-prefix">${getCurrencySymbol(row.currency)}</span>
+          <input class="form-input" id="bal-${row.id}" type="number" min="0" step="0.01"
+            placeholder="0.00" value="${row.balance}"
+            style="border-radius:0 var(--radius-sm) var(--radius-sm) 0" />
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCryptoFields(row) {
+  return `
+    <div class="crypto-info">
+      <div class="crypto-info-title">Bank Deposit Addresses</div>
+      <div style="font-size:12px;color:var(--grey-500);margin-bottom:10px">
+        Clients send crypto to these addresses. Edit if needed.
+      </div>
+      ${CRYPTOS.map(coin => `
+        <div class="crypto-addr-row">
+          <span class="crypto-coin-label">${coin}</span>
+          <input class="crypto-addr-input" id="addr-${coin}-${row.id}"
+            value="${row.cryptoAddrs[coin] || ''}"
+            placeholder="${coin} address" />
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:10px">
+      <div style="font-size:12px;font-weight:500;color:var(--grey-500);margin-bottom:5px">Initial Balance (optional)</div>
+      <div class="amount-wrap">
+        <span class="amount-prefix">≋</span>
+        <input class="form-input" id="bal-${row.id}" type="number" min="0" step="0.00000001"
+          placeholder="0.00000000" value="${row.balance}"
+          style="border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-family:monospace" />
+      </div>
+    </div>
+  `;
+}
+
+function getCurrencySymbol(c) {
+  const map = { GBP: '£', USD: '$', EUR: '€', CHF: 'Fr' };
+  return map[c] || c;
+}
+
+// ═══════════════════════════════════════════════════════
+// LIVE PREVIEW
+// ═══════════════════════════════════════════════════════
+function updatePreview() {
+  const fname = document.getElementById('f-fname')?.value.trim() || '';
+  const lname = document.getElementById('f-lname')?.value.trim() || '';
+  const uname = document.getElementById('f-user')?.value.trim() || '';
+  const box = document.getElementById('preview-content');
+  if (!box) return;
+
+  if (!fname && !lname && !uname) {
+    box.innerHTML = `<div class="preview-empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Start filling the form to see a preview
+    </div>`;
+    return;
+  }
+
+  const initials = ((fname[0] || '') + (lname[0] || '')).toUpperCase() || '?';
+  const fullName = [fname, lname].filter(Boolean).join(' ') || 'New Client';
+
+  const accHtml = accountRows.map(row => {
+    const bal = parseFloat(row.balance) || 0;
+    const label = TYPE_LABELS[row.type];
+    let balStr = row.type === 'crypto' ? `${bal.toFixed(8)} (mixed)` : `${getCurrencySymbol(row.currency)}${bal.toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    return `
+      <div class="preview-account ${row.type}">
+        <div class="preview-acc-type">${label}</div>
+        <div class="preview-acc-balance">${balStr}</div>
+      </div>
+    `;
+  }).join('');
+
+  box.innerHTML = `
+    <div class="preview-user">
+      <div class="preview-avatar">${initials}</div>
+      <div>
+        <div class="preview-name">${fullName || '—'}</div>
+        <div class="preview-username">@${uname || '—'}</div>
+        ${isAdmin ? `<span style="font-size:10px;background:var(--gold);color:white;padding:1px 6px;border-radius:3px;font-weight:700">ADMIN</span>` : ''}
+      </div>
+    </div>
+    <div>${accHtml}</div>
+    <div style="font-size:11px;color:var(--grey-400);margin-top:12px;text-align:center">
+      ${accountRows.length} account${accountRows.length !== 1 ? 's' : ''} will be created
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// FORM SUBMIT
+// ═══════════════════════════════════════════════════════
+async function submitForm() {
+  clearErrors();
+  const fname    = document.getElementById('f-fname').value.trim();
+  const lname    = document.getElementById('f-lname').value.trim();
+  const email    = document.getElementById('f-email').value.trim();
+  const username = document.getElementById('f-user').value.trim();
+  const password = document.getElementById('f-pass').value;
+
+  let hasError = false;
+  if (!fname)    { showError('err-fname', 'err-fname'); hasError = true; }
+  if (!lname)    { showError('err-lname', 'err-lname'); hasError = true; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('err-email', 'err-email'); hasError = true; }
+  if (!username) { showError('err-user', 'err-user'); hasError = true; }
+  if (!password || password.length < 8) { showError('err-pass', 'err-pass'); hasError = true; }
+  if (hasError) { showToast('Please fix the errors above', 'error'); return; }
+
+  // Build accounts payload
+  const accounts = accountRows.map(row => ({
+    type:     row.type,
+    currency: row.type === 'crypto' ? null : row.currency,
+    balance:  parseFloat(row.balance) || 0,
+    cryptoAddresses: row.type === 'crypto' ? row.cryptoAddrs : undefined,
+  }));
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<div class="spinner"></div> Registering...`;
+
+  try {
+    const res = await apiFetch('/admin/clients', {
+      method: 'POST',
+      body: JSON.stringify({ firstName: fname, lastName: lname, email, username, password, isAdmin, accounts }),
+    });
+
+    // Show success screen
+    showSuccessScreen(res.client, username, password);
+  } catch(e) {
+    showToast(e.message || 'Registration failed', 'error');
+    btn.disabled = false;
+    btn.innerHTML = 'Register Client';
+  }
+}
+
+function showSuccessScreen(client, username, password) {
+  const main = document.getElementById('main-content');
+  main.innerHTML = `
+    <div class="card" style="max-width:500px;margin:40px auto">
+      <div class="success-screen">
+        <div class="success-icon">✓</div>
+        <h2>Client Registered!</h2>
+        <p>${client.firstName} ${client.lastName} has been successfully added to the system.</p>
+
+        <div class="credentials-box">
+          <div class="cred-row">
+            <span class="cred-label">Full Name</span>
+            <span class="cred-value">${client.firstName} ${client.lastName}</span>
+          </div>
+          <div class="cred-row">
+            <span class="cred-label">Username</span>
+            <span class="cred-value">${username}</span>
+          </div>
+          <div class="cred-row">
+            <span class="cred-label">Temp. Password</span>
+            <span class="cred-value">${password}</span>
+          </div>
+          <div class="cred-row">
+            <span class="cred-label">Accounts Created</span>
+            <span class="cred-value">${(client.accounts || []).length}</span>
+          </div>
+        </div>
+
+        <p style="font-size:12px;color:var(--red);background:var(--red-bg);padding:10px;border-radius:6px;margin-bottom:20px">
+          ⚠️ Share these credentials securely. The client should change their password immediately after first login.
+        </p>
+
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="location.reload()">Register Another Client</button>
+          <button class="btn btn-outline" onclick="window.location.href='index.html'">Back to App</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showError(errId) {
+  const el = document.getElementById(errId);
+  if (el) el.classList.add('show');
+}
+
+function clearErrors() {
+  document.querySelectorAll('.form-error').forEach(e => e.classList.remove('show'));
+  document.querySelectorAll('.form-input').forEach(e => e.classList.remove('error'));
+}
+
+function resetForm() {
+  document.getElementById('f-fname').value = '';
+  document.getElementById('f-lname').value = '';
+  document.getElementById('f-email').value = '';
+  document.getElementById('f-phone').value = '';
+  document.getElementById('f-user').value  = '';
+  document.getElementById('f-pass').value  = '';
+  isAdmin = false;
+  nextRowId = 1;
+  accountRows = [];
+  addAccountRow('current');
+  clearErrors();
+  updatePreview();
+}
+
+// ═══════════════════════════════════════════════════════
+// CLIENTS LIST
+// ═══════════════════════════════════════════════════════
+async function loadClients() {
+  const el = document.getElementById('clients-list');
+  el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--grey-400);font-size:14px">Loading...</div>`;
+  try {
+    const clients = await apiFetch('/admin/clients');
+    renderClientsList(clients);
+  } catch(e) {
+    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red);font-size:14px">Error: ${e.message}</div>`;
+  }
+}
+
+function renderClientsList(clients) {
+  const el = document.getElementById('clients-list');
+  if (!clients.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--grey-400);font-size:14px">No clients registered yet.</div>`;
+    return;
+  }
+
+  el.innerHTML = clients.map(c => `
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--green-100);color:var(--green-800);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          ${(c.firstName[0]+c.lastName[0]).toUpperCase()}
+        </div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700">${c.firstName} ${c.lastName}
+            ${c.isAdmin ? `<span class="admin-badge" style="margin-left:6px">ADMIN</span>` : ''}
+          </div>
+          <div style="font-size:12px;color:var(--grey-500)">@${c.username} · ${c.email}</div>
+          ${c.createdAt ? `<div style="font-size:11px;color:var(--grey-400);margin-top:2px">Registered: ${new Date(c.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>` : ''}
+        </div>
+        ${c.id !== user?.id ? `
+          <button onclick="deleteClient('${c.id}', '${c.firstName} ${c.lastName}')"
+            style="background:var(--red-bg);color:var(--red);border:none;cursor:pointer;padding:7px 12px;border-radius:6px;font-size:12px;font-weight:600;font-family:inherit">
+            Delete
+          </button>
+        ` : '<span style="font-size:11px;color:var(--grey-400)">(you)</span>'}
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${(c.accounts || []).map(a => `
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--grey-100);border-radius:var(--radius-sm);padding:10px 14px">
+            <div>
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--grey-500)">${a.label || a.type}</div>
+              <div style="font-size:15px;font-weight:700;margin-top:2px">
+                ${a.type === 'crypto' ? 'Crypto' : `£${(a.balance||0).toLocaleString('en-GB',{minimumFractionDigits:2})}`}
+              </div>
+              ${a.iban ? `<div style="font-size:11px;color:var(--grey-400);font-family:monospace;margin-top:2px">${a.iban}</div>` : ''}
+            </div>
+            ${a.type !== 'crypto' ? `
+              <div style="display:flex;gap:6px">
+                <button onclick="quickCredit('${a.id}','${a.label||a.type}','${c.firstName} ${c.lastName}')"
+                  style="background:var(--green-50);color:var(--green-700);border:1px solid var(--green-200);padding:7px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
+                  + Credit
+                </button>
+                <button onclick="quickDebit('${a.id}','${a.label||a.type}','${c.firstName} ${c.lastName}')"
+                  style="background:var(--red-bg);color:var(--red);border:1px solid #FECACA;padding:7px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
+                  − Debit
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// QUICK CREDIT / DEBIT POPUPS
+// ═══════════════════════════════════════════════════════
+function quickCredit(accountId, label, clientName) {
+  const amount = prompt(`Credit "${label}" for ${clientName}\nEnter amount (GBP):`);
+  if (!amount || isNaN(parseFloat(amount))) return;
+  const desc = prompt('Description (optional):', 'Manual credit by bank') || 'Manual credit by bank';
+  apiFetch('/admin/credit', {
+    method: 'POST',
+    body: JSON.stringify({ accountId, amount: parseFloat(amount), description: desc }),
+  }).then(r => {
+    showToast(`✓ Credited £${parseFloat(amount).toFixed(2)} to ${clientName}`);
+    loadClients();
+  }).catch(e => showToast(e.message, 'error'));
+}
+
+function quickDebit(accountId, label, clientName) {
+  const amount = prompt(`Debit "${label}" for ${clientName}\nEnter amount (GBP):`);
+  if (!amount || isNaN(parseFloat(amount))) return;
+  const desc = prompt('Description (optional):', 'Manual debit by bank') || 'Manual debit by bank';
+  apiFetch('/admin/debit', {
+    method: 'POST',
+    body: JSON.stringify({ accountId, amount: parseFloat(amount), description: desc }),
+  }).then(r => {
+    showToast(`✓ Debited £${parseFloat(amount).toFixed(2)} from ${clientName}`);
+    loadClients();
+  }).catch(e => showToast(e.message, 'error'));
+}
+
+async function deleteClient(id, name) {
+  if (!confirm(`Delete client "${name}" and all their accounts? This cannot be undone.`)) return;
+  try {
+    await apiFetch(`/admin/clients/${id}`, { method: 'DELETE' });
+    showToast(`${name} deleted`);
+    loadClients();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════
+// EXTEND BACKEND — update admin route to handle balances
+// ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// API HELPER
+// ═══════════════════════════════════════════════════════
+async function apiFetch(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  const res = await fetch(`${API}${path}`, { ...opts, headers: { ...headers, ...(opts.headers||{}) } });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg, type = 'success') {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ═══════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
