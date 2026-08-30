@@ -191,7 +191,7 @@
 <body>
 <div id="root"></div>
 <script type="module">
-const API = 'http://localhost:4000/api';
+const API = 'https://for-clients.onrender.com/api';
 
 // ── STATE ─────────────────────────────────────────────────────────
 const state = {
@@ -1526,7 +1526,7 @@ function bindAll() {
   document.querySelectorAll('[data-export-csv]').forEach(b => b.onclick = () => {
     const accId = b.dataset.exportCsv;
     const label = b.dataset.accLabel;
-    window.open(`http://localhost:4000/api/admin/accounts/${accId}/export-csv?token=${state.token}`, '_blank');
+    window.open(`https://for-clients.onrender.com/api/admin/accounts/${accId}/export-csv?token=${state.token}`, '_blank');
   });
 
   // Refresh activity log
