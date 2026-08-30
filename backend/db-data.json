@@ -1,0 +1,158 @@
+{
+  "users": [
+    {
+      "id": "usr_001",
+      "username": "john.smith",
+      "passwordHash": "$2a$10$6NidsFRxhvO5IcNWLln5s.3cft/6REiDsey46IXL0cM0QUjFigOee",
+      "firstName": "John",
+      "lastName": "Smith",
+      "email": "j.smith@example.com",
+      "isAdmin": true,
+      "createdAt": "2026-08-26T08:37:42.722Z"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "acc_001",
+      "userId": "usr_001",
+      "type": "current",
+      "label": "Current Account",
+      "currency": "GBP",
+      "iban": "GI75 NWBK 0000 0700 1234 56",
+      "accountNumber": "70012345",
+      "sortCode": "56-00-20",
+      "balance": 14250.8
+    },
+    {
+      "id": "acc_002",
+      "userId": "usr_001",
+      "type": "savings",
+      "label": "Savings Account",
+      "currency": "GBP",
+      "iban": "GI75 NWBK 0000 0700 6543 21",
+      "accountNumber": "70065432",
+      "sortCode": "56-00-20",
+      "balance": 32100
+    },
+    {
+      "id": "acc_003",
+      "userId": "usr_001",
+      "type": "crypto",
+      "label": "Crypto Account",
+      "currency": null,
+      "cryptoAddresses": {
+        "BTC": "1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf9n",
+        "ETH": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        "USDT": "TN3W8e4BKMBK4K3nKzMr4jGxQMm3cVKgXj"
+      },
+      "balance": 0
+    }
+  ],
+  "transactions": [
+    {
+      "id": "b06be6e3-bfe6-4bd4-bfa6-9e7b59c53640",
+      "accountId": "acc_001",
+      "type": "credit",
+      "amount": 5000,
+      "currency": "GBP",
+      "description": "Salary - Acme Corp Ltd",
+      "reference": "SAL-2026-06",
+      "counterparty": "Acme Corp Ltd",
+      "date": "2026-06-01T09:00:00Z",
+      "status": "completed"
+    },
+    {
+      "id": "92b4b693-b3a7-4fe0-8657-c7f0c329ce32",
+      "accountId": "acc_001",
+      "type": "debit",
+      "amount": 1200,
+      "currency": "GBP",
+      "description": "Rent payment",
+      "reference": "RENT-JUNE",
+      "counterparty": "Gibraltar Properties Ltd",
+      "date": "2026-06-02T11:30:00Z",
+      "status": "completed"
+    },
+    {
+      "id": "3cab26b4-0fc0-4134-9b5d-9f5a76527d29",
+      "accountId": "acc_001",
+      "type": "debit",
+      "amount": 85.5,
+      "currency": "GBP",
+      "description": "Supermarket",
+      "reference": "POS-4421",
+      "counterparty": "Morrison Gibraltar",
+      "date": "2026-06-05T14:20:00Z",
+      "status": "completed"
+    },
+    {
+      "id": "4cdd6e54-0020-41aa-936c-89353f1894a6",
+      "accountId": "acc_001",
+      "type": "credit",
+      "amount": 350,
+      "currency": "GBP",
+      "description": "Transfer received",
+      "reference": "TRF-8812",
+      "counterparty": "Maria Rodriguez",
+      "date": "2026-06-10T16:45:00Z",
+      "status": "completed"
+    },
+    {
+      "id": "e82f4820-4ddc-41ce-b0ad-6fd3d7616fb6",
+      "accountId": "acc_002",
+      "type": "credit",
+      "amount": 2000,
+      "currency": "GBP",
+      "description": "Transfer to savings",
+      "reference": "INT-TRF-001",
+      "counterparty": "Self transfer",
+      "date": "2026-06-01T10:00:00Z",
+      "status": "completed"
+    }
+  ],
+  "pendingTransfers": [],
+  "activityLog": [
+    {
+      "id": "b83a573e-0dba-49de-a12f-813379caa2d2",
+      "userId": "usr_001",
+      "action": "login",
+      "details": {
+        "ip": "::1",
+        "username": "john.smith"
+      },
+      "date": "2026-08-26T08:38:17.132Z",
+      "ip": "::1"
+    },
+    {
+      "id": "88edb505-ae6b-4dbb-8696-bc87558379d9",
+      "userId": "usr_001",
+      "action": "login",
+      "details": {
+        "ip": "::1",
+        "username": "john.smith"
+      },
+      "date": "2026-08-28T08:36:32.437Z",
+      "ip": "::1"
+    },
+    {
+      "id": "5659a5bb-71ba-4f01-aabc-7cd0f80f9cf3",
+      "userId": "usr_001",
+      "action": "login",
+      "details": {
+        "ip": "::1",
+        "username": "john.smith"
+      },
+      "date": "2026-08-28T08:47:17.276Z"
+    },
+    {
+      "id": "14fdef79-0adc-4cd3-838f-7f16c17c5de3",
+      "userId": "usr_001",
+      "action": "login",
+      "details": {
+        "ip": "::1",
+        "username": "john.smith"
+      },
+      "date": "2026-08-28T08:59:33.514Z"
+    }
+  ]
+}

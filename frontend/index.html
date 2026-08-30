@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Trusted Novus Bank — Online Banking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-900:#0D2B1E; --green-800:#1B4332; --green-700:#2D6A4F;
+      --green-500:#40916C; --green-400:#52B788; --green-100:#D8F3DC; --green-50:#F0FAF4;
+      --accent:#4CAF7D; --gold:#C8A951; --red:#D64045; --red-bg:#FFF0F0;
+      --grey-900:#111827; --grey-700:#374151; --grey-500:#6B7280;
+      --grey-300:#D1D5DB; --grey-100:#F3F4F6; --white:#FFFFFF;
+      --radius:12px; --radius-sm:8px;
+      --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+      --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+      --font:'Inter',system-ui,sans-serif;
+    }
+    html,body{height:100%;font-family:var(--font);background:var(--grey-100);color:var(--grey-900);}
+    #root{height:100%;}
+    button{cursor:pointer;font-family:inherit;border:none;outline:none;}
+    input,select,textarea{font-family:inherit;}
+    a{text-decoration:none;color:inherit;}
+    .card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
+    .app-shell{display:flex;flex-direction:column;height:100vh;}
+    .topbar{background:var(--green-800);color:var(--white);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100;}
+    .topbar-logo{display:flex;align-items:center;gap:10px;}
+    .topbar-logo-text{font-size:15px;font-weight:700;letter-spacing:.02em;}
+    .topbar-logo-sub{font-size:9px;font-weight:400;letter-spacing:.12em;opacity:.7;display:block;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .topbar-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-500);color:white;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .page-content{flex:1;overflow-y:auto;padding:20px 16px 100px;max-width:520px;margin:0 auto;width:100%;}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--grey-300);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0);}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;gap:4px;background:none;color:var(--grey-500);font-size:10px;font-weight:500;letter-spacing:.02em;transition:color .15s;}
+    .nav-item.active{color:var(--green-700);}
+    .nav-item svg{width:22px;height:22px;}
+    .nav-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);margin-top:2px;opacity:0;transition:opacity .15s;}
+    .nav-item.active .nav-dot{opacity:1;}
+    .admin-badge{background:var(--gold);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.05em;}
+
+    /* LOGIN */
+    .login-page{min-height:100vh;display:flex;flex-direction:column;background:var(--white);}
+    .login-header{background:var(--green-800);padding:48px 32px 40px;color:white;display:flex;flex-direction:column;align-items:flex-start;gap:16px;}
+    .login-header h1{font-size:26px;font-weight:700;line-height:1.2;}
+    .login-header p{font-size:14px;opacity:.75;}
+    .login-body{flex:1;padding:32px 24px;}
+    .login-footer{padding:20px 24px;text-align:center;font-size:11px;color:var(--grey-500);}
+    .login-links{display:flex;justify-content:center;gap:16px;margin-bottom:8px;}
+
+    /* FORMS */
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-label{font-size:13px;font-weight:500;color:var(--grey-700);}
+    .form-label span{color:var(--red);margin-left:2px;}
+    .form-input{width:100%;padding:12px 13px;border:1.5px solid var(--grey-300);border-radius:var(--radius-sm);font-size:14px;color:var(--grey-900);background:var(--white);transition:border-color .15s;appearance:none;font-family:inherit;}
+    .form-input:focus{border-color:var(--green-500);outline:none;box-shadow:0 0 0 3px rgba(64,145,108,.12);}
+    .form-input.lg{font-size:16px;padding:13px 14px;}
+    .form-input-wrap{position:relative;}
+    .form-input-wrap .form-input{padding-right:44px;}
+    .form-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;color:var(--grey-500);padding:0;display:flex;align-items:center;border:none;cursor:pointer;}
+    .form-hint{font-size:11px;color:var(--grey-500);}
+    .form-select{width:100%;padding:11px 32px 11px 13px;border:1.5px solid var(--grey-300);border-radius:var(--radius-sm);font-size:14px;color:var(--grey-900);background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center;cursor:pointer;font-family:inherit;transition:border-color .15s;appearance:none;}
+    .form-select:focus{border-color:var(--green-500);outline:none;}
+    .check-row{display:flex;align-items:center;gap:10px;cursor:pointer;}
+    .check-box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--grey-300);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;}
+    .check-box.checked{background:var(--green-700);border-color:var(--green-700);}
+
+    /* BUTTONS */
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;transition:all .15s;width:100%;border:none;cursor:pointer;font-family:inherit;}
+    .btn-primary{background:var(--green-700);color:white;}
+    .btn-primary:hover{background:var(--green-800);}
+    .btn-primary:active{transform:scale(.98);}
+    .btn-primary:disabled{background:var(--grey-300);color:var(--grey-500);cursor:not-allowed;transform:none;}
+    .btn-outline{background:none;color:var(--green-700);border:1.5px solid var(--green-700);}
+    .btn-outline:hover{background:var(--green-50);}
+    .btn-grey{background:none;color:var(--grey-700);border:1.5px solid var(--grey-300);}
+    .btn-grey:hover{background:var(--grey-100);}
+    .btn-danger{background:var(--red);color:white;}
+    .btn-sm{padding:8px 13px;font-size:12px;width:auto;border-radius:6px;}
+    .btn-icon{width:auto;flex:1;border-radius:var(--radius-sm);border:1.5px solid var(--green-100);background:var(--green-50);color:var(--green-700);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;font-size:11px;font-weight:600;padding:12px 8px;}
+    .btn-icon svg{width:20px;height:20px;}
+    .btn-icon:hover{background:var(--green-100);}
+
+    /* ACCOUNT CARDS */
+    .account-card{border-radius:16px;padding:20px;color:white;position:relative;overflow:hidden;margin-bottom:12px;}
+    .account-card.current{background:linear-gradient(135deg,var(--green-800) 0%,var(--green-700) 100%);}
+    .account-card.savings{background:linear-gradient(135deg,#1a3a5c 0%,#2563a8 100%);}
+    .account-card.crypto{background:linear-gradient(135deg,#2d1b4e 0%,#5b21b6 100%);}
+    .account-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.07);}
+    .account-balance{font-size:30px;font-weight:700;margin-top:8px;letter-spacing:-.5px;}
+    .account-iban{font-size:11px;opacity:.6;margin-top:10px;letter-spacing:.04em;font-family:monospace;}
+    .crypto-addr-item{background:rgba(255,255,255,.1);border-radius:8px;padding:10px 12px;margin-top:8px;}
+    .crypto-addr-coin{font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.8;}
+    .crypto-addr-val{font-size:11px;font-family:monospace;margin-top:3px;word-break:break-all;}
+
+    /* TRANSACTIONS */
+    .txn-list{display:flex;flex-direction:column;gap:1px;}
+    .txn-item{background:var(--white);padding:14px 16px;display:flex;align-items:center;gap:12px;transition:background .1s;}
+    .txn-item:first-child{border-radius:var(--radius) var(--radius) 0 0;}
+    .txn-item:last-child{border-radius:0 0 var(--radius) var(--radius);}
+    .txn-item:only-child{border-radius:var(--radius);}
+    .txn-item:hover{background:var(--grey-100);}
+    .txn-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .txn-icon.credit{background:#E8F8F0;color:var(--green-500);}
+    .txn-icon.debit{background:var(--red-bg);color:var(--red);}
+    .txn-details{flex:1;min-width:0;}
+    .txn-desc{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .txn-meta{font-size:12px;color:var(--grey-500);margin-top:2px;}
+    .txn-amount{font-size:15px;font-weight:600;text-align:right;flex-shrink:0;}
+    .txn-amount.credit{color:var(--green-500);}
+
+    /* UI BITS */
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .section-title{font-size:16px;font-weight:700;}
+    .see-all{font-size:13px;color:var(--green-700);font-weight:500;background:none;border:none;cursor:pointer;}
+    .summary-card{background:var(--green-50);border-radius:var(--radius);padding:16px;display:flex;justify-content:space-between;margin-bottom:16px;}
+    .summary-value{font-size:20px;font-weight:700;}
+    .summary-label{font-size:11px;color:var(--grey-500);font-weight:500;text-transform:uppercase;letter-spacing:.06em;}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--grey-500);}
+    .divider{height:1px;background:var(--grey-100);margin:14px 0;}
+
+    /* TOAST */
+    .toast-container{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:360px;width:calc(100% - 32px);}
+    .toast{padding:12px 16px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:white;display:flex;align-items:center;gap:10px;animation:slideDown .2s ease;box-shadow:var(--shadow-lg);}
+    .toast.success{background:var(--green-700);}
+    .toast.error{background:var(--red);}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .15s ease;}
+    .modal{background:var(--white);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .2s ease;}
+    .modal-handle{width:36px;height:4px;background:var(--grey-300);border-radius:2px;margin:0 auto 20px;}
+    .modal-title{font-size:18px;font-weight:700;margin-bottom:16px;}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    @keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+    /* ADMIN & CLIENTS */
+    .client-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px;}
+    .client-card-header{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--grey-100);}
+    .client-avatar{width:40px;height:40px;border-radius:50%;background:var(--green-100);color:var(--green-800);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .client-name{font-size:15px;font-weight:600;}
+    .client-user{font-size:12px;color:var(--grey-500);}
+    .client-accounts{padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+    .client-account-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:var(--radius-sm);background:var(--grey-100);}
+    .client-account-actions{display:flex;gap:6px;}
+
+    /* REGISTER PAGE */
+    .reg-section{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:14px;}
+    .reg-section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--grey-500);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--grey-100);}
+    .acc-row{border:1.5px solid var(--grey-200);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;background:var(--grey-100);}
+    .acc-row-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .type-tabs{display:flex;background:var(--white);border-radius:6px;padding:2px;gap:2px;border:1px solid var(--grey-200);}
+    .type-tab{flex:1;padding:7px 4px;border:none;cursor:pointer;border-radius:5px;font-size:12px;font-weight:500;color:var(--grey-500);background:none;transition:all .15s;font-family:inherit;}
+    .type-tab.active{background:var(--green-700);color:white;}
+    .amount-wrap{display:flex;}
+    .amount-prefix{background:var(--grey-100);border:1.5px solid var(--grey-300);border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);padding:0 12px;font-size:14px;font-weight:600;color:var(--grey-500);display:flex;align-items:center;white-space:nowrap;}
+    .amount-wrap .form-input{border-radius:0 var(--radius-sm) var(--radius-sm) 0;flex:1;}
+    .add-acc-btn{width:100%;padding:10px;border:1.5px dashed var(--grey-300);border-radius:var(--radius-sm);background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--green-700);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;font-family:inherit;}
+    .add-acc-btn:hover{border-color:var(--green-500);background:var(--green-50);}
+    .rm-acc{background:none;border:none;cursor:pointer;color:var(--grey-400);font-size:18px;padding:0 4px;line-height:1;transition:color .15s;}
+    .rm-acc:hover{color:var(--red);}
+    .acc-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+    .acc-dot.current{background:var(--green-500);}
+    .acc-dot.savings{background:#3B82F6;}
+    .acc-dot.crypto{background:#8B5CF6;}
+    .success-box{background:var(--green-50);border:1px solid var(--green-100);border-radius:var(--radius);padding:20px;text-align:center;}
+    .success-icon{width:56px;height:56px;border-radius:50%;background:var(--green-100);color:var(--green-700);font-size:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+    .cred-box{background:var(--grey-100);border-radius:var(--radius-sm);padding:14px;text-align:left;margin:14px 0;}
+    .cred-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--grey-200);font-size:13px;}
+    .cred-row:last-child{border:none;}
+    .cred-label{color:var(--grey-500);}
+    .cred-value{font-weight:600;font-family:monospace;}
+
+    /* MISC */
+    .acc-select-item{padding:12px 14px;border:1.5px solid var(--grey-300);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;margin-bottom:8px;}
+    .acc-select-item.selected{border-color:var(--green-500);background:var(--green-50);}
+    .confirm-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;}
+    .confirm-row-label{font-size:13px;color:var(--grey-500);}
+    .confirm-row-value{font-size:14px;font-weight:600;}
+    .contact-item{display:flex;align-items:flex-start;gap:14px;padding:16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;}
+    .contact-icon{width:40px;height:40px;border-radius:10px;background:var(--green-50);color:var(--green-700);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;}
+    .spinner.dark{border-color:rgba(0,0,0,.1);border-top-color:var(--green-700);}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .back-link{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--green-700);background:none;border:none;cursor:pointer;padding:0;margin-bottom:16px;}
+    .forgot-link{font-size:13px;color:var(--green-700);font-weight:500;background:none;border:none;cursor:pointer;}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+const API = 'http://localhost:4000/api';
+
+// ── STATE ─────────────────────────────────────────────────────────
+const state = {
+  token: localStorage.getItem('tnb_token') || null,
+  user:  JSON.parse(localStorage.getItem('tnb_user') || 'null'),
+  accounts: [], transactions: {}, clients: [], toasts: [],
+  activityLog: [],
+  page: 'home', modal: null, loading: false, rememberMe: false,
+  adminTab: 'clients',
+  editingClient: null,
+  clientSearch: '',
+  reg: { rows: [], isAdmin: false, nextId: 1 },
+};
+
+// ── API ───────────────────────────────────────────────────────────
+async function api(path, opts = {}) {
+  const h = { 'Content-Type': 'application/json' };
+  if (state.token) h['Authorization'] = `Bearer ${state.token}`;
+  const r = await fetch(`${API}${path}`, { ...opts, headers: { ...h, ...(opts.headers||{}) } });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Request failed');
+  return d;
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const id = Date.now();
+  state.toasts.push({ id, msg, type });
+  render();
+  setTimeout(() => { state.toasts = state.toasts.filter(t => t.id !== id); render(); }, 3500);
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────
+async function login(username, password) {
+  state.loading = true; render();
+  try {
+    const d = await api('/auth/login', { method:'POST', body: JSON.stringify({ username, password }) });
+    state.token = d.token; state.user = d.user;
+    localStorage.setItem('tnb_token', d.token);
+    localStorage.setItem('tnb_user', JSON.stringify(d.user));
+    await loadAccounts();
+    toast(`Welcome back, ${d.user.firstName}!`);
+  } catch(e) { state.loading = false; toast(e.message, 'error'); render(); }
+}
+function logout() {
+  state.token = null; state.user = null; state.accounts = []; state.transactions = {};
+  localStorage.removeItem('tnb_token'); localStorage.removeItem('tnb_user');
+  state.page = 'home'; render();
+}
+
+// ── DATA ──────────────────────────────────────────────────────────
+async function loadAccounts() {
+  state.loading = true; render();
+  try {
+    state.accounts = await api('/accounts');
+    for (const a of state.accounts) {
+      if (a.type !== 'crypto') {
+        const r = await api(`/accounts/${a.id}/transactions`);
+        state.transactions[a.id] = r.transactions || [];
+      }
+    }
+  } catch(e) { toast('Could not load accounts', 'error'); }
+  state.loading = false; render();
+}
+async function loadClients() {
+  try { state.clients = await api('/admin/clients'); render(); }
+  catch(e) { toast(e.message, 'error'); }
+}
+async function loadActivityLog() {
+  try {
+    const r = await api('/admin/activity?limit=100');
+    state.activityLog = r.log || [];
+    render();
+  } catch(e) { toast(e.message,'error'); }
+}
+async function loadClientAccTxns(accountId) {
+  try {
+    const r = await api(`/admin/accounts/${accountId}/transactions`);
+    state.clientDetailTxns = r.transactions || [];
+  } catch(e) {
+    toast(e.message, 'error');
+    state.clientDetailTxns = [];
+  }
+  state.clientDetailLoading = false;
+  render();
+}
+
+// ── FORMAT ────────────────────────────────────────────────────────
+const fmt = (n, cur = 'GBP') => new Intl.NumberFormat('en-GB', { style:'currency', currency: cur }).format(n);
+const fmtD = d => new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+const initials = u => ((u.firstName?.[0]||'') + (u.lastName?.[0]||'')).toUpperCase();
+const isAdmin = () => state.user && (state.user.id === 'usr_001' || state.user.isAdmin);
+const curSymbol = c => ({ GBP:'£', USD:'$', EUR:'€', CHF:'Fr' }[c] || c);
+
+// ══════════════════════════════════════════════════════════════════
+// RENDER ENGINE
+// ══════════════════════════════════════════════════════════════════
+const root = document.getElementById('root');
+function render() {
+  if (!state.token) { root.innerHTML = renderLogin(); bindLogin(); return; }
+  root.innerHTML = `
+    ${renderToasts()}
+    <div class="app-shell">
+      ${renderTopbar()}
+      <div class="page-content">${renderPage()}</div>
+      ${renderBottomNav()}
+    </div>
+    ${state.modal ? renderModal() : ''}
+  `;
+  bindAll();
+}
+
+// ── TOASTS ───────────────────────────────────────────────────────
+function renderToasts() {
+  if (!state.toasts.length) return '';
+  return `<div class="toast-container">${state.toasts.map(t =>
+    `<div class="toast ${t.type}">${t.type==='success'?'✓':'✕'} ${t.msg}</div>`).join('')}</div>`;
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────
+function renderLogin() {
+  return `${renderToasts()}
+  <div class="login-page">
+    <div class="login-header">
+      <div style="display:flex;align-items:center;gap:12px">${tnLogo('white')}
+        <div><div style="font-size:18px;font-weight:700">TRUSTED NOVUS</div><div style="font-size:10px;opacity:.7;letter-spacing:.12em">BANK</div></div>
+      </div>
+      <h1>Welcome to<br>Online Banking</h1>
+      <p>Secure access to your accounts</p>
+    </div>
+    <div class="login-body">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="form-group"><label class="form-label">Username</label>
+          <input id="l-user" class="form-input lg" type="text" placeholder="Enter username" autocomplete="username" /></div>
+        <div class="form-group"><label class="form-label">Password</label>
+          <div class="form-input-wrap">
+            <input id="l-pass" class="form-input lg" type="password" placeholder="Enter password" autocomplete="current-password" />
+            <button class="form-eye" id="l-eye">${iEye()}</button>
+          </div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="check-row" id="l-remember">
+            <div class="check-box ${state.rememberMe?'checked':''}" id="l-check">${state.rememberMe?iCheck():''}</div>
+            <span style="font-size:14px;color:var(--grey-700)">Remember Me</span>
+          </div>
+          <button class="forgot-link">Forgot Password?</button>
+        </div>
+        <button class="btn btn-primary" id="l-submit" style="margin-top:8px">Sign In</button>
+      </div>
+      <div style="margin-top:24px;padding:16px;background:var(--green-50);border-radius:var(--radius-sm);border-left:3px solid var(--green-400)">
+        <div style="font-size:13px;font-weight:600;color:var(--green-800);margin-bottom:6px">Protect Yourself</div>
+        <p style="font-size:12px;color:var(--grey-700);line-height:1.5">Scammers are becoming more sophisticated. We will never ask for your OTP, online banking credentials, or request that you transfer money.</p>
+      </div>
+    </div>
+    <div class="login-footer">
+      <div class="login-links">
+        <a href="https://trustednovusbank.gi/contact" target="_blank">Contact Us</a>
+        <a href="https://trustednovusbank.gi/privacy" target="_blank">Privacy Policy</a>
+        <a href="https://trustednovusbank.gi/terms" target="_blank">Terms &amp; Conditions</a>
+      </div>
+      <div>© Trusted Novus Bank Ltd 2025</div>
+    </div>
+  </div>`;
+}
+function bindLogin() {
+  document.getElementById('l-eye')?.addEventListener('click', () => {
+    const p = document.getElementById('l-pass'); p.type = p.type==='password'?'text':'password';
+  });
+  document.getElementById('l-remember')?.addEventListener('click', () => { state.rememberMe = !state.rememberMe; render(); });
+  document.getElementById('l-submit')?.addEventListener('click', async () => {
+    const u = document.getElementById('l-user').value.trim();
+    const p = document.getElementById('l-pass').value;
+    if (!u || !p) { toast('Enter username and password','error'); return; }
+    await login(u, p);
+  });
+  document.getElementById('l-pass')?.addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('l-submit')?.click(); });
+}
+
+// ── TOPBAR ────────────────────────────────────────────────────────
+function renderTopbar() {
+  const u = state.user;
+  const admin = isAdmin();
+  return `<div class="topbar">
+    <div class="topbar-logo">
+      ${tnLogo('white', 24)}
+      <div><span class="topbar-logo-text">TRUSTED NOVUS</span><span class="topbar-logo-sub">BANK</span></div>
+      ${admin ? `<span class="admin-badge">ADMIN</span>` : ''}
+    </div>
+    <div class="topbar-right">
+      <button class="btn-ghost" id="change-pw-btn" style="color:rgba(255,255,255,.75);font-size:12px;padding:6px 10px">🔒 Password</button>
+      <div class="topbar-avatar" id="tp-avatar">${u ? initials(u) : '?'}</div>
+    </div>
+  </div>
+  ${u?.mustChangePassword ? `<div style="background:#C2410C;color:white;text-align:center;font-size:13px;font-weight:600;padding:10px;cursor:pointer" id="must-change-pw-banner">
+    ⚠️ Please change your temporary password before continuing →
+  </div>` : ''}`;
+}
+
+// ── BOTTOM NAV ────────────────────────────────────────────────────
+function renderBottomNav() {
+  const admin = isAdmin();
+  const tabs = [
+    { id:'home',    label:'Home',    icon:iHome() },
+    { id:'transfer',label:'Transfer',icon:iTransfer() },
+    { id:'crypto',  label:'Crypto',  icon:iCrypto() },
+    { id:'contact', label:'Contact', icon:iPhone() },
+    ...(admin ? [
+      { id:'clients', label:'Clients', icon:iClients() },
+      { id:'admin',   label:'Admin',   icon:iAdmin() },
+    ] : []),
+  ];
+  return `<nav class="bottom-nav">${tabs.map(t => `
+    <button class="nav-item ${state.page===t.id||state.page==='register'&&t.id==='admin'||state.page==='client-detail'&&t.id==='clients'?'active':''}" data-page="${t.id}">
+      ${t.icon}<span>${t.label}</span><div class="nav-dot"></div>
+    </button>`).join('')}</nav>`;
+}
+
+// ── PAGES ─────────────────────────────────────────────────────────
+function renderPage() {
+  if (state.loading && state.accounts.length===0) return `<div style="display:flex;justify-content:center;padding-top:60px"><div class="spinner dark" style="width:32px;height:32px;border-width:3px"></div></div>`;
+  switch(state.page) {
+    case 'home':          return renderHome();
+    case 'transfer':      return renderTransfer();
+    case 'crypto':        return renderCrypto();
+    case 'contact':       return renderContact();
+    case 'admin':         return renderAdmin();
+    case 'register':      return renderRegisterPage();
+    case 'clients':       return renderClientsPage();
+    case 'client-detail': return renderClientDetail();
+    default:              return renderHome();
+  }
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────
+function renderHome() {
+  const accs = state.accounts.filter(a => a.type!=='crypto');
+  // Group balances by currency
+  const byCurrency = {};
+  accs.forEach(a => { byCurrency[a.currency] = (byCurrency[a.currency]||0) + a.balance; });
+  const currencies = Object.keys(byCurrency);
+  const balanceDisplay = currencies.length === 1
+    ? fmt(byCurrency[currencies[0]], currencies[0])
+    : currencies.map(c => fmt(byCurrency[c], c)).join(' + ');
+
+  const txns = Object.values(state.transactions).flat().sort((a,b) => new Date(b.date)-new Date(a.date)).slice(0,8);
+  return `
+    <div class="summary-card">
+      <div><span class="summary-label">Total Balance</span><div class="summary-value">${balanceDisplay}</div></div>
+      <div style="text-align:right"><span class="summary-label">Accounts</span><div class="summary-value">${state.accounts.length}</div></div>
+    </div>
+    <div class="section-header"><span class="section-title">My Accounts</span></div>
+    ${state.accounts.map(renderAccountCard).join('')}
+    <div style="display:flex;gap:10px;margin:20px 0">
+      <button class="btn-icon" data-modal="send">${iSend()}<span>Send</span></button>
+      <button class="btn-icon" data-modal="receive">${iReceive()}<span>Receive</span></button>
+      <button class="btn-icon" onclick="window._goto('crypto')">${iCrypto()}<span>Crypto</span></button>
+    </div>
+    <div class="section-header"><span class="section-title">Recent Activity</span><button class="see-all" onclick="window._goto('transfer')">See all</button></div>
+    ${txns.length===0 ? `<div class="empty-state"><p>No transactions yet</p></div>` : `<div class="txn-list">${txns.map(renderTxn).join('')}</div>`}
+  `;
+}
+function renderAccountCard(a) {
+  if (a.type==='crypto') return `
+    <div class="account-card crypto" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:600;opacity:.7;letter-spacing:.1em;text-transform:uppercase">Crypto Account</div>
+      <div style="font-size:14px;margin-top:4px;opacity:.9">Digital Assets</div>
+      ${Object.entries(a.cryptoAddresses||{}).map(([coin,addr]) => `
+        <div class="crypto-addr-item"><div class="crypto-addr-coin">${coin}</div><div class="crypto-addr-val">${addr}</div></div>`).join('')}
+    </div>`;
+  return `
+    <div class="account-card ${a.type}" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:600;opacity:.7;letter-spacing:.1em;text-transform:uppercase">${a.label}</div>
+      <div class="account-balance"><span style="font-size:16px;opacity:.8;margin-right:4px">${a.currency}</span>${a.balance.toLocaleString('en-GB',{minimumFractionDigits:2})}</div>
+      <div class="account-iban">${a.iban}</div>
+      <div class="account-iban">Sort: ${a.sortCode} · Acc: ${a.accountNumber}</div>
+    </div>`;
+}
+function renderTxn(t, showStatusBtn = false) {
+  const country = t.senderCountry || t.recipientCountry;
+  const countryStr = country ? ` · ${[t.senderCountry, t.recipientCountry].filter(Boolean).join(' → ')}` : '';
+  const statusColors = { pending:'#B45309,#FFFBEB', completed:'#166534,#DCFCE7', rejected:'#991B1B,#FEE2E2' };
+  const statusLabels = { pending:'Pending', completed:'Delivered', rejected:'Rejected' };
+  const st = t.status || 'completed';
+  const [stColor, stBg] = (statusColors[st] || statusColors.completed).split(',');
+  const statusBadge = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${stBg};color:${stColor};letter-spacing:.04em">${statusLabels[st]||st}</span>`;
+
+  // Format date for datetime-local input (YYYY-MM-DDTHH:MM)
+  const dtLocal = t.date ? new Date(t.date).toISOString().slice(0,16) : '';
+
+  const adminControls = showStatusBtn ? `
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <select data-status-txn="${t.id}" style="font-size:11px;padding:4px 6px;border:1px solid var(--grey-300);border-radius:4px;background:white;font-family:inherit;cursor:pointer">
+        <option value="">Status…</option>
+        <option value="pending"   ${st==='pending'  ?'selected':''}>⏳ Pending</option>
+        <option value="completed" ${st==='completed'?'selected':''}>✅ Delivered</option>
+        <option value="rejected"  ${st==='rejected' ?'selected':''}>❌ Rejected</option>
+      </select>
+      <input type="datetime-local" data-date-txn="${t.id}" value="${dtLocal}"
+        style="font-size:11px;padding:4px 6px;border:1px solid var(--grey-300);border-radius:4px;font-family:inherit;color:var(--grey-700)" />
+      <button data-save-date-txn="${t.id}" style="font-size:11px;padding:4px 10px;background:var(--green-700);color:white;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:600">Save date</button>
+    </div>` : '';
+
+  return `<div class="txn-item" style="flex-wrap:wrap">
+    <div class="txn-icon ${t.type}">${t.type==='credit'?iArrowDown():iArrowUp()}</div>
+    <div class="txn-details">
+      <div class="txn-desc">${t.description}</div>
+      <div class="txn-meta">${t.counterparty} · ${fmtD(t.date)}${countryStr}</div>
+      <div style="margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">${statusBadge}</div>
+      ${adminControls}
+    </div>
+    <div class="txn-amount ${t.type}">${t.type==='credit'?'+':'−'}${fmt(t.amount, t.currency)}</div>
+  </div>`;
+}
+
+// ─── TRANSFER ─────────────────────────────────────────────────────
+function renderTransfer() {
+  const txns = Object.values(state.transactions).flat().sort((a,b) => new Date(b.date)-new Date(a.date));
+  return `
+    <div class="section-header" style="margin-bottom:20px"><span class="section-title">Payments & Transfers</span></div>
+    <div style="display:flex;gap:10px;margin-bottom:24px">
+      <button class="btn btn-primary" data-modal="send" style="flex:1">${iSend()}&nbsp;Send Money</button>
+      <button class="btn btn-outline" data-modal="receive" style="flex:1">${iReceive()}&nbsp;Receive</button>
+    </div>
+    <div class="section-header"><span class="section-title">History</span></div>
+    ${txns.length===0 ? `<div class="empty-state"><p>No transactions yet</p></div>` : `<div class="txn-list">${txns.map(renderTxn).join('')}</div>`}
+  `;
+}
+
+// ─── CRYPTO ───────────────────────────────────────────────────────
+function renderCrypto() {
+  const ca = state.accounts.find(a => a.type==='crypto');
+  if (!ca) return `<div class="empty-state"><p>No crypto account</p></div>`;
+  return `
+    <div class="section-title" style="margin-bottom:16px">Crypto Account</div>
+    <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,#2d1b4e,#5b21b6);color:white">
+      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.1em;font-weight:600">Digital Assets Wallet</div>
+      <div style="font-size:14px;margin-top:8px;opacity:.85">Trusted Novus Bank</div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-title" style="margin-bottom:4px">Deposit Addresses</div>
+      <p style="font-size:13px;color:var(--grey-500);margin-bottom:16px">Send crypto to these addresses to fund your account.</p>
+      ${Object.entries(ca.cryptoAddresses||{}).map(([coin,addr]) => `
+        <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--grey-100)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:13px;font-weight:700">${coin}</span>
+            ${coin==='BTC'?'<span style="font-size:11px;color:var(--gold);background:#FFF8E6;padding:2px 6px;border-radius:4px;font-weight:600">Bitcoin</span>':''}
+            ${coin==='ETH'?'<span style="font-size:11px;color:#6366F1;background:#EEF2FF;padding:2px 6px;border-radius:4px;font-weight:600">Ethereum</span>':''}
+            ${coin==='USDT'?'<span style="font-size:11px;color:#059669;background:#ECFDF5;padding:2px 6px;border-radius:4px;font-weight:600">Tether</span>':''}
+          </div>
+          <div style="background:var(--grey-100);border-radius:8px;padding:10px 12px;font-size:12px;font-family:monospace;word-break:break-all;color:var(--grey-700)">${addr}</div>
+          <button onclick="navigator.clipboard.writeText('${addr}').then(()=>window._toast('Copied!','success'))"
+            style="margin-top:8px;font-size:12px;color:var(--green-700);font-weight:500;background:none;border:none;cursor:pointer;padding:0">${iCopy()} Copy</button>
+        </div>`).join('')}
+    </div>
+    <div class="card" style="background:var(--green-50);border:1px solid var(--green-100)">
+      <div style="font-size:13px;font-weight:600;color:var(--green-800);margin-bottom:6px">Important</div>
+      <p style="font-size:12px;color:var(--grey-700);line-height:1.6">Only send the matching cryptocurrency to each address. Wrong asset sends may result in permanent loss.</p>
+    </div>`;
+}
+
+// ─── CONTACT ──────────────────────────────────────────────────────
+function renderContact() {
+  return `
+    <div class="section-title" style="margin-bottom:20px">Contact Us</div>
+    <div class="contact-item">
+      <div class="contact-icon">${iBuilding()}</div>
+      <div><div style="font-size:12px;color:var(--grey-500);font-weight:500;text-transform:uppercase;letter-spacing:.06em">Corporate Office</div>
+        <div style="font-size:15px;font-weight:500;margin-top:3px">76, Main Street<br>P.O. Box 143, Gibraltar</div></div>
+    </div>
+    <div class="card" style="margin-top:8px;background:var(--green-50);border:1px solid var(--green-100)">
+      <div style="font-size:13px;font-weight:600;color:var(--green-800);margin-bottom:6px">About Trusted Novus Bank</div>
+      <p style="font-size:13px;color:var(--grey-700);line-height:1.6">Trusted Novus Bank Ltd is authorised and regulated by the Gibraltar Financial Services Commission.</p>
+    </div>
+    <div style="margin-top:20px;text-align:center">
+      <a href="https://trustednovusbank.gi" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--green-700);font-weight:500">${iGlobe()} trustednovusbank.gi</a>
+    </div>`;
+}
+
+// ─── CLIENTS PAGE ─────────────────────────────────────────────────
+function renderClientsPage() {
+  const q = (state.clientSearch||'').toLowerCase();
+  const filtered = state.clients.filter(c =>
+    !q || `${c.firstName} ${c.lastName} ${c.username} ${c.email}`.toLowerCase().includes(q)
+  );
+  return `
+    <div class="section-title" style="margin-bottom:16px">Clients</div>
+
+    <!-- Search -->
+    <div style="position:relative;margin-bottom:16px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--grey-400)">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="client-search" class="form-input" style="padding-left:38px" placeholder="Search by name, username or email…"
+        value="${state.clientSearch||''}" />
+    </div>
+
+    ${filtered.length===0
+      ? `<div class="empty-state"><p>No clients found</p></div>`
+      : filtered.map(c => `
+        <div data-open-client="${c.id}" style="background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);
+          padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .1s"
+          onmouseover="this.style.background='var(--grey-100)'" onmouseout="this.style.background='var(--white)'">
+          <div style="width:42px;height:42px;border-radius:50%;background:var(--green-100);color:var(--green-800);
+            font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            ${(c.firstName[0]+c.lastName[0]).toUpperCase()}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:15px;font-weight:600">${c.firstName} ${c.lastName}
+              ${c.isAdmin?`<span class="admin-badge" style="margin-left:6px">ADMIN</span>`:''}
+            </div>
+            <div style="font-size:12px;color:var(--grey-500);margin-top:2px">@${c.username} · ${c.email}</div>
+            <div style="font-size:12px;color:var(--green-700);font-weight:600;margin-top:4px">
+              ${(c.accounts||[]).filter(a=>a.type!=='crypto').map(a=>`${fmt(a.balance,a.currency)}`).join(' · ')}
+            </div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--grey-400)">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>`).join('')}
+  `;
+}
+
+// ─── CLIENT DETAIL PAGE ───────────────────────────────────────────
+function renderClientDetail() {
+  const c = state.clients.find(cl => cl.id === state.selectedClientId);
+  if (!c) return `<div class="empty-state"><p>Client not found</p></div>`;
+
+  const selAcc = state.clientDetailAccId || (c.accounts||[])[0]?.id;
+  const acc = (c.accounts||[]).find(a => a.id === selAcc);
+  const txns = (state.clientDetailTxns || []);
+
+  return `
+    <!-- Back -->
+    <button class="back-link" id="client-detail-back">← All Clients</button>
+
+    <!-- Client header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--green-100);color:var(--green-800);
+        font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${(c.firstName[0]+c.lastName[0]).toUpperCase()}
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:700">${c.firstName} ${c.lastName}</div>
+        <div style="font-size:13px;color:var(--grey-500)">@${c.username} · ${c.email}</div>
+      </div>
+    </div>
+
+    <!-- Account selector tabs -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+      ${(c.accounts||[]).filter(a=>a.type!=='crypto').map(a => `
+        <button data-sel-acc="${a.id}" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;
+          background:${a.id===selAcc?'var(--green-700)':'var(--grey-100)'};
+          color:${a.id===selAcc?'white':'var(--grey-600)'};
+          border:${a.id===selAcc?'none':'1px solid var(--grey-200)'}">${a.label}
+          <span style="opacity:.8;margin-left:4px">${fmt(a.balance,a.currency)}</span>
+        </button>`).join('')}
+    </div>
+
+    ${acc ? `
+    <!-- Quick actions for selected account -->
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button class="btn btn-sm" style="background:var(--green-50);color:var(--green-700);border:1.5px solid var(--green-200);flex:1"
+        data-modal="credit" data-acc-id="${acc.id}" data-acc-label="${acc.label}" data-client-name="${c.firstName} ${c.lastName}">
+        + Credit
+      </button>
+      <button class="btn btn-sm" style="background:var(--red-bg);color:var(--red);border:1.5px solid #FECACA;flex:1"
+        data-modal="debit" data-acc-id="${acc.id}" data-acc-label="${acc.label}" data-client-name="${c.firstName} ${c.lastName}">
+        − Debit
+      </button>
+      <button class="btn btn-sm" style="background:var(--grey-100);color:var(--grey-700);border:1.5px solid var(--grey-300);flex:1"
+        data-add-txn="${acc.id}" data-acc-label="${acc.label}" data-client-name="${c.firstName} ${c.lastName}">
+        + Add Transaction
+      </button>
+    </div>` : ''}
+
+    <!-- Transactions -->
+    <div class="section-header" style="margin-bottom:12px">
+      <span class="section-title">Transactions</span>
+      ${state.clientDetailLoading ? `<div class="spinner dark" style="width:18px;height:18px;border-width:2px"></div>` : ''}
+    </div>
+
+    ${state.clientDetailLoading
+      ? ''
+      : txns.length===0
+        ? `<div class="empty-state"><p>No transactions for this account</p></div>`
+        : `<div class="txn-list">${txns.map(t => renderTxnEditable(t)).join('')}</div>`
+    }
+  `;
+}
+
+// Transaction row with inline edit controls (for client detail page)
+function renderTxnEditable(t) {
+  const statusColors = { pending:'#B45309,#FFFBEB', completed:'#166534,#DCFCE7', rejected:'#991B1B,#FEE2E2' };
+  const statusLabels = { pending:'Pending', completed:'Delivered', rejected:'Rejected' };
+  const st = t.status || 'completed';
+  const [stColor, stBg] = (statusColors[st]||statusColors.completed).split(',');
+  const dtLocal = t.date ? new Date(t.date).toISOString().slice(0,16) : '';
+  const country = t.senderCountry||t.recipientCountry;
+  const countryStr = country ? ` · ${[t.senderCountry,t.recipientCountry].filter(Boolean).join(' → ')}` : '';
+
+  return `
+    <div style="background:var(--white);padding:14px 16px;border-bottom:1px solid var(--grey-100)">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div class="txn-icon ${t.type}" style="flex-shrink:0;margin-top:2px">${t.type==='credit'?iArrowDown():iArrowUp()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600">${t.description}</div>
+          <div style="font-size:12px;color:var(--grey-500);margin-top:2px">${t.counterparty} · ${fmtD(t.date)}${countryStr}</div>
+          <span style="display:inline-block;margin-top:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${stBg};color:${stColor}">${statusLabels[st]||st}</span>
+        </div>
+        <div style="font-size:15px;font-weight:700;color:${t.type==='credit'?'var(--green-500)':'var(--grey-900)'};white-space:nowrap">
+          ${t.type==='credit'?'+':'−'}${fmt(t.amount,t.currency)}
+        </div>
+      </div>
+
+      <!-- Edit controls -->
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--grey-100);display:flex;flex-direction:column;gap:8px">
+        <!-- Status -->
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--grey-500);font-weight:500;width:60px">Status</span>
+          <select data-inline-status="${t.id}" style="flex:1;padding:7px 10px;border:1.5px solid var(--grey-300);border-radius:6px;font-size:13px;font-family:inherit;background:white">
+            <option value="pending"   ${st==='pending'  ?'selected':''}>⏳ Pending</option>
+            <option value="completed" ${st==='completed'?'selected':''}>✅ Delivered</option>
+            <option value="rejected"  ${st==='rejected' ?'selected':''}>❌ Rejected</option>
+          </select>
+        </div>
+        <!-- Date -->
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--grey-500);font-weight:500;width:60px">Date</span>
+          <input type="datetime-local" data-inline-date="${t.id}" value="${dtLocal}"
+            style="flex:1;padding:7px 10px;border:1.5px solid var(--grey-300);border-radius:6px;font-size:13px;font-family:inherit" />
+        </div>
+        <!-- Save row -->
+        <div style="display:flex;justify-content:flex-end">
+          <button data-inline-save="${t.id}" style="padding:7px 18px;background:var(--green-700);color:white;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────────
+function renderAdmin() {
+  const tab = state.adminTab || 'clients';
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <span class="section-title">Admin Panel</span>
+      <button class="btn btn-primary btn-sm" id="go-register">${iPlus()} Register Client</button>
+    </div>
+    <div style="display:flex;gap:0;border-bottom:2px solid var(--grey-200);margin-bottom:20px;overflow-x:auto">
+      ${[['clients','👥 Clients'],['overview','📊 Overview'],['activity','📋 Activity']].map(([id,label]) => `
+        <button data-admin-tab="${id}" style="padding:10px 14px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;white-space:nowrap;
+          color:${tab===id?'var(--green-700)':'var(--grey-500)'};
+          border-bottom:2px solid ${tab===id?'var(--green-700)':'transparent'};margin-bottom:-2px">
+          ${label}
+        </button>`).join('')}
+    </div>
+    ${tab==='clients' ? renderAdminClients() : tab==='overview' ? renderAdminOverview() : renderAdminActivity()}
+  `;
+}
+
+function renderAdminActivity() {
+  const log = state.activityLog || [];
+  const actionLabels = {
+    login:                   '🔑 Login',
+    password_changed:        '🔒 Changed password',
+    password_reset_by_admin: '🔑 Password reset by admin',
+    transfer_sent:           '💸 Transfer sent',
+    admin_credit:            '➕ Admin credited account',
+    admin_debit:             '➖ Admin debited account',
+    client_registered:       '👤 Client registered',
+    account_blocked:         '🚫 Account blocked',
+    account_unblocked:       '✅ Account unblocked',
+    profile_updated_by_admin:'✏️ Profile updated by admin',
+  };
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span style="font-size:14px;font-weight:600">Recent Activity</span>
+      <button class="btn btn-sm" style="background:var(--grey-100);color:var(--grey-700);border:1px solid var(--grey-300)" id="refresh-activity">↺ Refresh</button>
+    </div>
+    ${log.length===0
+      ? `<div class="empty-state"><p>No activity recorded yet</p></div>`
+      : `<div style="display:flex;flex-direction:column;gap:1px">
+          ${log.slice(0,100).map(e => `
+            <div style="background:var(--white);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--grey-100)">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:600">${actionLabels[e.action]||e.action}</div>
+                <div style="font-size:12px;color:var(--grey-700);margin-top:2px">${e.userName||e.userId}
+                  ${e.adminName?`<span style="color:var(--grey-400)"> · by ${e.adminName}</span>`:''}
+                </div>
+                ${e.details && Object.keys(e.details).length>0 ? `
+                  <div style="font-size:11px;color:var(--grey-500);margin-top:3px">
+                    ${e.details.amount?`Amount: ${e.details.amount} ${e.details.currency||''} · `:''}
+                    ${e.details.toName?`To: ${e.details.toName} · `:''}
+                    ${e.details.description?`${e.details.description}`:''}
+                  </div>` : ''}
+              </div>
+              <div style="font-size:11px;color:var(--grey-400);white-space:nowrap;flex-shrink:0">${fmtD(e.date)}</div>
+            </div>`).join('')}
+        </div>`
+    }`;
+}
+
+function renderAdminClients() {
+  if (state.clients.length===0) return `<div class="empty-state"><p>No clients yet.<br>Click "Register Client" to add one.</p></div>`;
+  return state.clients.map(renderClientCard).join('');
+}
+
+function renderAdminOverview() {
+  const allAccounts = state.clients.flatMap(c => (c.accounts||[]).map(a => ({...a, clientName:`${c.firstName} ${c.lastName}`, username:c.username})));
+  const fiat = allAccounts.filter(a => a.type!=='crypto');
+  const byCur = {};
+  fiat.forEach(a => { byCur[a.currency] = (byCur[a.currency]||0) + a.balance; });
+
+  return `
+    <!-- Summary cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div class="card" style="text-align:center">
+        <div style="font-size:24px;font-weight:700;color:var(--green-700)">${state.clients.length}</div>
+        <div style="font-size:12px;color:var(--grey-500);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.06em">Total Clients</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:24px;font-weight:700;color:var(--green-700)">${allAccounts.length}</div>
+        <div style="font-size:12px;color:var(--grey-500);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.06em">Total Accounts</div>
+      </div>
+    </div>
+
+    <!-- Balances by currency -->
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--grey-500);margin-bottom:14px">Assets Under Management</div>
+      ${Object.entries(byCur).length===0
+        ? `<p style="color:var(--grey-400);font-size:13px">No fiat accounts yet</p>`
+        : Object.entries(byCur).map(([cur,bal]) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--grey-100)">
+            <span style="font-size:14px;font-weight:600">${cur}</span>
+            <span style="font-size:18px;font-weight:700;color:var(--green-700)">${fmt(bal,cur)}</span>
+          </div>`).join('')}
+    </div>
+
+    <!-- All accounts table -->
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--grey-500);margin-bottom:14px">All Accounts</div>
+      ${fiat.map(a => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--grey-100)">
+          <div>
+            <div style="font-size:13px;font-weight:600">${a.clientName}</div>
+            <div style="font-size:11px;color:var(--grey-500)">@${a.username} · ${a.label}</div>
+            ${a.iban?`<div style="font-size:10px;font-family:monospace;color:var(--grey-400)">${a.iban}</div>`:''}
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:15px;font-weight:700">${fmt(a.balance,a.currency)}</div>
+            <div style="display:flex;gap:4px;margin-top:4px;justify-content:flex-end">
+              <button class="btn btn-sm" style="background:var(--green-50);color:var(--green-700);border:1px solid var(--green-200);padding:4px 8px;font-size:11px"
+                data-modal="credit" data-acc-id="${a.id}" data-acc-label="${a.label}" data-client-name="${a.clientName}">+</button>
+              <button class="btn btn-sm" style="background:var(--red-bg);color:var(--red);border:1px solid #FECACA;padding:4px 8px;font-size:11px"
+                data-modal="debit" data-acc-id="${a.id}" data-acc-label="${a.label}" data-client-name="${a.clientName}">−</button>
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+function renderClientCard(c) {
+  const editing = state.editingClient === c.id;
+  return `<div class="client-card" style="margin-bottom:12px">
+    <div class="client-card-header">
+      <div class="client-avatar">${(c.firstName[0]+c.lastName[0]).toUpperCase()}</div>
+      <div style="flex:1">
+        ${editing ? `
+          <div style="display:flex;gap:6px;margin-bottom:4px">
+            <input id="edit-fname-${c.id}" class="form-input" style="padding:6px 8px;font-size:13px" value="${c.firstName}" placeholder="First name" />
+            <input id="edit-lname-${c.id}" class="form-input" style="padding:6px 8px;font-size:13px" value="${c.lastName}" placeholder="Last name" />
+          </div>
+          <input id="edit-email-${c.id}" class="form-input" style="padding:6px 8px;font-size:12px" value="${c.email}" placeholder="Email" />
+        ` : `
+          <div class="client-name">${c.firstName} ${c.lastName}
+            ${c.isAdmin?`<span class="admin-badge" style="margin-left:6px">ADMIN</span>`:''}
+            ${c.blocked?`<span style="background:var(--red);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:6px">BLOCKED</span>`:''}
+          </div>
+          <div class="client-user">@${c.username} · ${c.email}</div>
+          ${c.mustChangePassword?`<div style="font-size:11px;color:#C2410C;margin-top:2px">⚠ Must change password</div>`:''}
+          ${c.createdAt?`<div style="font-size:11px;color:var(--grey-400)">Joined ${fmtD(c.createdAt)}</div>`:''}
+        `}
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        ${editing ? `
+          <button class="btn btn-primary btn-sm" data-save-client="${c.id}">Save</button>
+          <button class="btn btn-grey btn-sm" data-cancel-edit="${c.id}">Cancel</button>
+        ` : `
+          <button class="btn btn-sm" style="background:var(--green-50);color:var(--green-700);border:1px solid var(--green-200)" data-edit-client="${c.id}">✎ Edit</button>
+          ${c.id!=='usr_001'&&c.id!==state.user?.id ? `
+            <button class="btn btn-sm" style="background:${c.blocked?'var(--green-50)':'#FFF7ED'};color:${c.blocked?'var(--green-700)':'#C2410C'};border:1px solid ${c.blocked?'var(--green-200)':'#FED7AA'}" data-block-client="${c.id}" data-blocked="${c.blocked?'1':'0'}">${c.blocked?'✓ Unblock':'⊘ Block'}</button>
+            <button class="btn btn-sm" style="background:var(--grey-100);color:var(--grey-700);border:1px solid var(--grey-300)" data-reset-pw="${c.id}" data-client-name="${c.firstName} ${c.lastName}">🔑 Reset PW</button>
+            <button class="btn btn-danger btn-sm" data-del="${c.id}">✕</button>
+          ` : ''}
+        `}
+      </div>
+    </div>
+    <div class="client-accounts">${(c.accounts||[]).map(a => `
+      <div class="client-account-row">
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--grey-500)">${a.label||a.type}</div>
+          ${editing && a.type!=='crypto' ? `
+            <div style="display:flex;gap:6px;margin-top:4px;align-items:center">
+              <span style="font-size:14px;font-weight:600;color:var(--grey-500)">${curSymbol(a.currency||'GBP')}</span>
+              <input id="edit-bal-${a.id}" class="form-input" type="number" step="0.01"
+                style="padding:6px 8px;font-size:14px;font-weight:700;max-width:140px" value="${a.balance}" />
+            </div>
+          ` : `
+            <div style="font-size:16px;font-weight:700;margin-top:2px">${a.type==='crypto'?'Crypto':fmt(a.balance,a.currency||'GBP')}</div>
+          `}
+          ${a.iban?`<div style="font-size:11px;color:var(--grey-500);font-family:monospace;margin-top:2px">${a.iban}</div>`:''}
+        </div>
+        ${a.type!=='crypto' && !editing ? `<div class="client-account-actions" style="flex-direction:column;gap:4px">
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn btn-sm" style="background:var(--grey-100);color:var(--grey-700);border:1px solid var(--grey-300);font-size:11px"
+              data-history="${a.id}" data-acc-label="${a.label||a.type}" data-client-name="${c.firstName} ${c.lastName}">📋 History</button>
+            <button class="btn btn-sm" style="background:var(--green-50);color:var(--green-700);border:1px solid var(--green-200);font-size:11px"
+              data-modal="credit" data-acc-id="${a.id}" data-acc-label="${a.label||a.type}" data-client-name="${c.firstName} ${c.lastName}">+ Credit</button>
+            <button class="btn btn-sm" style="background:var(--red-bg);color:var(--red);border:1px solid #FECACA;font-size:11px"
+              data-modal="debit" data-acc-id="${a.id}" data-acc-label="${a.label||a.type}" data-client-name="${c.firstName} ${c.lastName}">− Debit</button>
+            <button class="btn btn-sm" style="background:var(--grey-100);color:var(--grey-700);border:1px solid var(--grey-300);font-size:11px"
+              data-export-csv="${a.id}" data-acc-label="${a.label||a.type}">⬇ CSV</button>
+          </div>
+        </div>` : ''}
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ─── REGISTER PAGE ────────────────────────────────────────────────
+function renderRegisterPage() {
+  const r = state.reg;
+  const rows = r.rows;
+  return `
+    <button class="back-link" id="reg-back">← Back to Admin</button>
+    <div class="section-title" style="margin-bottom:20px">Register New Client</div>
+
+    <!-- Personal info -->
+    <div class="reg-section">
+      <div class="reg-section-title">👤 Personal Info</div>
+      <div style="display:flex;gap:12px;margin-bottom:14px">
+        <div class="form-group" style="flex:1"><label class="form-label">First Name <span>*</span></label>
+          <input id="r-fname" class="form-input" placeholder="John" value="${r.fname||''}" /></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Last Name <span>*</span></label>
+          <input id="r-lname" class="form-input" placeholder="Smith" value="${r.lname||''}" /></div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Email <span>*</span></label>
+        <input id="r-email" class="form-input" type="email" placeholder="john@example.com" value="${r.email||''}" /></div>
+      <div class="form-group"><label class="form-label">Phone (optional)</label>
+        <input id="r-phone" class="form-input" type="tel" placeholder="+350 200 12345" value="${r.phone||''}" /></div>
+    </div>
+
+    <!-- Credentials -->
+    <div class="reg-section">
+      <div class="reg-section-title">🔐 Login Credentials</div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Username <span>*</span></label>
+        <input id="r-user" class="form-input" placeholder="john.smith" autocomplete="off" value="${r.username||''}" />
+        <span class="form-hint">Lowercase letters, numbers and dots only</span></div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Temporary Password <span>*</span></label>
+        <div class="form-input-wrap">
+          <input id="r-pass" class="form-input" type="password" placeholder="Min. 8 characters" autocomplete="new-password" value="${r.password||''}" />
+          <button class="form-eye" id="r-eye">${iEye()}</button>
+        </div>
+        <span class="form-hint">Client must change this after first login.</span></div>
+      <div class="check-row" id="r-admin-row">
+        <div class="check-box ${r.isAdmin?'checked':''}" id="r-admin-check">${r.isAdmin?iCheck():''}</div>
+        <div><div style="font-size:14px;font-weight:500">Grant Admin Access</div>
+          <div style="font-size:12px;color:var(--grey-500)">Can manage clients and credit/debit accounts</div></div>
+      </div>
+    </div>
+
+    <!-- Accounts -->
+    <div class="reg-section">
+      <div class="reg-section-title">💳 Accounts</div>
+      <div id="r-acc-rows">
+        ${rows.length===0 ? `<p style="font-size:13px;color:var(--grey-400);text-align:center;padding:10px 0">No accounts yet.</p>` : rows.map(renderAccRow).join('')}
+      </div>
+      <button class="add-acc-btn" id="r-add-acc">${iPlus()} Add Account</button>
+    </div>
+
+    <!-- Submit -->
+    <div style="display:flex;gap:12px">
+      <button class="btn btn-primary" id="r-submit" style="flex:1">Register Client</button>
+      <button class="btn btn-grey" id="r-clear" style="flex:0 0 auto;width:auto;padding:13px 18px">Clear</button>
+    </div>
+
+    ${r.success ? renderRegSuccess() : ''}
+  `;
+}
+
+function renderAccRow(row) {
+  const isCrypto = row.type==='crypto';
+  const TYPE_LABELS = { current:'Current Account', savings:'Savings Account', crypto:'Crypto Account' };
+  return `
+    <div class="acc-row" id="acc-row-${row.id}">
+      <div class="acc-row-header">
+        <span style="font-size:13px;font-weight:600;color:var(--grey-700)">
+          <span class="acc-dot ${row.type}"></span>${TYPE_LABELS[row.type]}
+        </span>
+        <button class="rm-acc" data-rm="${row.id}">×</button>
+      </div>
+      <div class="type-tabs" style="margin-bottom:12px">
+        <button class="type-tab ${row.type==='current'?'active':''}" data-type-btn="${row.id}" data-type="current">💳 Current</button>
+        <button class="type-tab ${row.type==='savings'?'active':''}" data-type-btn="${row.id}" data-type="savings">🏦 Savings</button>
+        <button class="type-tab ${row.type==='crypto' ?'active':''}" data-type-btn="${row.id}" data-type="crypto">₿ Crypto</button>
+      </div>
+      ${isCrypto ? `
+        <div style="background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:var(--radius-sm);padding:12px">
+          <div style="font-size:12px;font-weight:600;color:#5B21B6;margin-bottom:8px">Deposit Addresses</div>
+          ${['BTC','ETH','USDT'].map(coin => `
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+              <span style="width:40px;font-size:11px;font-weight:700;color:#5B21B6;flex-shrink:0">${coin}</span>
+              <input style="flex:1;padding:7px 10px;border:1px solid rgba(139,92,246,.2);border-radius:6px;font-size:12px;font-family:monospace;background:white"
+                data-addr="${row.id}" data-coin="${coin}" value="${(row.cryptoAddrs||{})[coin]||''}" placeholder="${coin} address" />
+            </div>`).join('')}
+        </div>
+        <div class="form-group" style="margin-top:10px">
+          <label class="form-label">Initial Balance (optional)</label>
+          <div class="amount-wrap">
+            <span class="amount-prefix">≋</span>
+            <input class="form-input" data-bal="${row.id}" type="number" min="0" step="0.00000001" placeholder="0.00" value="${row.balance||''}" />
+          </div>
+        </div>` : `
+        <div style="display:flex;gap:10px">
+          <div class="form-group" style="flex:0 0 80px">
+            <label class="form-label">Currency</label>
+            <select class="form-select" data-cur="${row.id}" style="padding:11px 28px 11px 10px">
+              ${['GBP','USD','EUR','CHF'].map(c => `<option value="${c}" ${c===row.currency?'selected':''}>${c}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Opening Balance</label>
+            <div class="amount-wrap">
+              <span class="amount-prefix">${curSymbol(row.currency||'GBP')}</span>
+              <input class="form-input" data-bal="${row.id}" type="number" min="0" step="0.01" placeholder="0.00" value="${row.balance||''}" />
+            </div>
+          </div>
+        </div>
+        <!-- Historical transactions -->
+        <div style="margin-top:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <span style="font-size:12px;font-weight:600;color:var(--grey-600)">Past Transactions (optional)</span>
+            <button class="add-acc-btn" data-add-hist="${row.id}" style="width:auto;padding:5px 12px;font-size:12px;border-style:dashed">
+              ${iPlus()} Add Transaction
+            </button>
+          </div>
+          <div id="hist-rows-${row.id}">
+            ${(row.history||[]).map((h,hi) => renderHistRow(row.id, hi, h)).join('')}
+          </div>
+        </div>`}
+    </div>`;
+}
+
+function renderHistRow(rowId, hi, h = {}) {
+  return `
+    <div style="display:grid;grid-template-columns:80px 1fr 100px 90px 24px;gap:6px;align-items:center;margin-bottom:6px" id="hist-${rowId}-${hi}">
+      <select data-hist-type="${rowId}-${hi}" style="padding:7px 6px;border:1.5px solid var(--grey-300);border-radius:6px;font-size:12px;font-family:inherit;background:white">
+        <option value="credit" ${(h.type||'credit')==='credit'?'selected':''}>⬇ In</option>
+        <option value="debit"  ${h.type==='debit'?'selected':''}>⬆ Out</option>
+      </select>
+      <input data-hist-desc="${rowId}-${hi}" style="padding:7px 10px;border:1.5px solid var(--grey-300);border-radius:6px;font-size:12px;font-family:inherit" placeholder="Description" value="${h.description||''}" />
+      <input data-hist-amount="${rowId}-${hi}" type="number" min="0.01" step="0.01" style="padding:7px 10px;border:1.5px solid var(--grey-300);border-radius:6px;font-size:12px;font-family:inherit" placeholder="Amount" value="${h.amount||''}" />
+      <input data-hist-date="${rowId}-${hi}" type="date" style="padding:6px 8px;border:1.5px solid var(--grey-300);border-radius:6px;font-size:11px;font-family:inherit" value="${h.date?h.date.slice(0,10):''}" />
+      <button data-rm-hist="${rowId}-${hi}" style="background:none;border:none;cursor:pointer;color:var(--grey-400);font-size:18px;padding:0;line-height:1">×</button>
+    </div>`;
+}
+
+function renderRegSuccess() {
+  const s = state.reg.success;
+  return `
+    <div class="success-box" style="margin-top:20px">
+      <div class="success-icon">✓</div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:6px">Client Registered!</div>
+      <p style="font-size:13px;color:var(--grey-500);margin-bottom:12px">${s.firstName} ${s.lastName} added successfully.</p>
+      <div class="cred-box">
+        <div class="cred-row"><span class="cred-label">Username</span><span class="cred-value">${s.username}</span></div>
+        <div class="cred-row"><span class="cred-label">Password</span><span class="cred-value">${s.tempPass}</span></div>
+        <div class="cred-row"><span class="cred-label">Accounts</span><span class="cred-value">${s.accountCount}</span></div>
+      </div>
+      <p style="font-size:12px;color:var(--red);background:var(--red-bg);padding:10px;border-radius:6px;margin-bottom:14px">
+        ⚠️ Share these credentials securely. Client must change password on first login.
+      </p>
+      <button class="btn btn-outline" id="r-another">Register Another</button>
+    </div>`;
+}
+
+// ── MODALS ────────────────────────────────────────────────────────
+function renderModal() {
+  const m = state.modal;
+  let content = '';
+  if (m.type==='send')    content = renderSendModal();
+  if (m.type==='receive') content = renderReceiveModal();
+  if (m.type==='credit')  content = renderCreditModal();
+  if (m.type==='debit')   content = renderDebitModal();
+  if (m.type==='history') content = renderHistoryModal();
+  if (m.type==='add-txn') content = renderAddTxnModal();
+  if (m.type==='change-password') content = renderChangePasswordModal();
+  return `<div class="modal-overlay" id="modal-overlay">
+    <div class="modal"><div class="modal-handle"></div>${content}</div>
+  </div>`;
+}
+
+function renderChangePasswordModal() {
+  return `
+    <div class="modal-title">Change Password</div>
+    <p style="font-size:13px;color:var(--grey-500);margin-bottom:16px">Choose a strong password. Min. 8 characters.</p>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group"><label class="form-label">Current Password</label>
+        <div class="form-input-wrap">
+          <input id="cp-current" class="form-input" type="password" placeholder="Current password" />
+          <button class="form-eye" onclick="document.getElementById('cp-current').type=document.getElementById('cp-current').type==='password'?'text':'password'">${iEye()}</button>
+        </div></div>
+      <div class="form-group"><label class="form-label">New Password</label>
+        <div class="form-input-wrap">
+          <input id="cp-new" class="form-input" type="password" placeholder="Min. 8 characters" />
+          <button class="form-eye" onclick="document.getElementById('cp-new').type=document.getElementById('cp-new').type==='password'?'text':'password'">${iEye()}</button>
+        </div></div>
+      <div class="form-group"><label class="form-label">Confirm New Password</label>
+        <input id="cp-confirm" class="form-input" type="password" placeholder="Repeat new password" /></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-grey" id="modal-close" style="flex:1">Cancel</button>
+        <button class="btn btn-primary" id="cp-submit" style="flex:1">Change Password</button>
+      </div>
+    </div>`;
+}
+
+function renderAddTxnModal() {
+  const m = state.modal;
+  const acc = m.acc;
+  const sym = curSymbol(acc?.currency||'GBP');
+  const today = new Date().toISOString().slice(0,16);
+  return `
+    <div class="modal-title">Add Transaction</div>
+    <p style="font-size:13px;color:var(--grey-500);margin-bottom:16px">
+      <strong>${m.clientName}</strong> — ${acc?.label||'Account'}
+    </p>
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- Type -->
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <div style="display:flex;gap:0;border-radius:var(--radius-sm);overflow:hidden;border:1.5px solid var(--grey-300)">
+          <button id="atxn-type-credit" onclick="window._setTxnType('credit')"
+            style="flex:1;padding:11px;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;
+            background:${(m.txnType||'credit')==='credit'?'var(--green-700)':'white'};
+            color:${(m.txnType||'credit')==='credit'?'white':'var(--grey-500)'}">
+            ⬇ Incoming
+          </button>
+          <button id="atxn-type-debit" onclick="window._setTxnType('debit')"
+            style="flex:1;padding:11px;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;
+            border-left:1.5px solid var(--grey-300);
+            background:${m.txnType==='debit'?'var(--red)':'white'};
+            color:${m.txnType==='debit'?'white':'var(--grey-500)'}">
+            ⬆ Outgoing
+          </button>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input id="atxn-desc" class="form-input" placeholder="e.g. Salary, Rent payment…" value="${m.txnDesc||''}" />
+      </div>
+
+      <!-- Counterparty -->
+      <div class="form-group">
+        <label class="form-label">${(m.txnType||'credit')==='credit'?'Sender':'Recipient'}</label>
+        <input id="atxn-party" class="form-input" placeholder="Name or company" value="${m.txnParty||''}" />
+      </div>
+
+      <!-- Amount -->
+      <div class="form-group">
+        <label class="form-label">Amount (${acc?.currency||'GBP'})</label>
+        <div class="amount-wrap">
+          <span class="amount-prefix">${sym}</span>
+          <input id="atxn-amount" class="form-input" type="number" min="0.01" step="0.01" placeholder="0.00"
+            style="border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:22px;font-weight:700"
+            value="${m.txnAmount||''}" />
+        </div>
+      </div>
+
+      <!-- Date -->
+      <div class="form-group">
+        <label class="form-label">Date & Time</label>
+        <input id="atxn-date" class="form-input" type="datetime-local" value="${m.txnDate||today}" />
+      </div>
+
+      <!-- Status -->
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="atxn-status" class="form-select">
+          <option value="completed">✅ Delivered</option>
+          <option value="pending">⏳ Pending</option>
+          <option value="rejected">❌ Rejected</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn btn-grey" id="modal-close" style="flex:1">Cancel</button>
+        <button class="btn btn-primary" id="atxn-submit" style="flex:1">Add Transaction</button>
+      </div>
+    </div>`;
+}
+function renderHistoryModal() {
+  const m = state.modal;
+  const txns = m.historyData || [];
+  return `<div class="modal-title">Transaction History</div>
+    <p style="font-size:13px;color:var(--grey-500);margin-bottom:16px"><strong>${m.clientName}</strong> — ${m.accLabel}</p>
+    ${m.historyLoading
+      ? `<div style="display:flex;justify-content:center;padding:30px"><div class="spinner dark" style="width:24px;height:24px;border-width:3px"></div></div>`
+      : txns.length===0
+        ? `<div class="empty-state"><p>No transactions for this account yet</p></div>`
+        : `<div style="font-size:12px;color:var(--grey-500);margin-bottom:10px">Use the dropdown on each transaction to change its status.</div>
+           <div class="txn-list">${txns.map(t => renderTxn(t, true)).join('')}</div>`
+    }
+    <button class="btn btn-grey" id="modal-close" style="margin-top:16px">Close</button>`;
+}
+function renderSendModal() {
+  const fiats = state.accounts.filter(a => a.type!=='crypto');
+  const sel = state.modal?.fromAccId || fiats[0]?.id || '';
+  const fa = fiats.find(a => a.id===sel) || fiats[0];
+  return `<div class="modal-title">Send Money</div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group"><label class="form-label">From Account</label>
+        ${fiats.map(a => `<div class="acc-select-item ${a.id===sel?'selected':''}" data-select-acc="${a.id}">
+          <div style="font-size:13px;font-weight:600">${a.label}</div>
+          <div style="font-size:15px;font-weight:700">${fmt(a.balance,a.currency)}</div>
+          <div style="font-size:11px;font-family:monospace;color:var(--grey-500)">${a.iban}</div></div>`).join('')}
+      </div>
+      <div class="form-group"><label class="form-label">Recipient IBAN</label>
+        <input id="s-iban" class="form-input" placeholder="GI75 XXXX XXXX XXXX XXXX XX" /></div>
+      <div class="form-group"><label class="form-label">Recipient Name</label>
+        <input id="s-name" class="form-input" placeholder="Full name or company" /></div>
+      <div style="display:flex;gap:10px">
+        <div class="form-group" style="flex:1"><label class="form-label">Your Country</label>
+          <input id="s-sender-country" class="form-input" placeholder="e.g. Gibraltar" /></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Recipient Country</label>
+          <input id="s-recipient-country" class="form-input" placeholder="e.g. United Kingdom" /></div>
+      </div>
+      <div class="form-group"><label class="form-label">Amount (${fa?.currency||'GBP'})</label>
+        <div class="amount-wrap"><span class="amount-prefix">${curSymbol(fa?.currency||'GBP')}</span>
+          <input id="s-amount" class="form-input" type="number" min="0.01" step="0.01" placeholder="0.00" style="border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:22px;font-weight:700" /></div></div>
+      <div class="form-group"><label class="form-label">Reference (optional)</label>
+        <input id="s-ref" class="form-input" placeholder="e.g. Invoice #123" /></div>
+      <div style="display:flex;gap:10px"><button class="btn btn-grey" id="modal-close" style="flex:1">Cancel</button>
+        <button class="btn btn-primary" id="s-submit" style="flex:1">Send Payment</button></div>
+    </div>`;
+}
+function renderReceiveModal() {
+  const fiats = state.accounts.filter(a => a.type!=='crypto');
+  return `<div class="modal-title">Receive Money</div>
+    <p style="font-size:14px;color:var(--grey-500);margin-bottom:16px">Share your account details to receive a payment.</p>
+    ${fiats.map(a => `<div style="margin-bottom:14px;padding:14px;background:var(--green-50);border-radius:var(--radius-sm)">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--grey-500);margin-bottom:8px">${a.label}</div>
+      <div class="confirm-row"><span class="confirm-row-label">IBAN</span><span class="confirm-row-value" style="font-family:monospace;font-size:12px">${a.iban}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Acc No.</span><span class="confirm-row-value">${a.accountNumber}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Sort Code</span><span class="confirm-row-value">${a.sortCode}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Balance</span><span class="confirm-row-value" style="color:var(--green-500)">${fmt(a.balance,a.currency)}</span></div>
+    </div>`).join('')}
+    <button class="btn btn-grey" id="modal-close">Close</button>`;
+}
+function renderCreditModal() {
+  const m = state.modal;
+  return `<div class="modal-title">Credit Account</div>
+    <p style="font-size:14px;color:var(--grey-500);margin-bottom:16px">Add funds to <strong>${m.clientName}</strong> — ${m.accLabel}</p>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group"><label class="form-label">Amount (GBP)</label>
+        <div class="amount-wrap"><span class="amount-prefix">£</span>
+          <input id="cr-amount" class="form-input" type="number" min="0.01" step="0.01" placeholder="0.00"
+            style="border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:22px;font-weight:700" /></div></div>
+      <div class="form-group"><label class="form-label">Description</label>
+        <input id="cr-desc" class="form-input" placeholder="e.g. Initial deposit" value="Manual credit by bank" /></div>
+      <div style="display:flex;gap:10px"><button class="btn btn-grey" id="modal-close" style="flex:1">Cancel</button>
+        <button class="btn btn-primary" id="cr-submit" style="flex:1">Credit Account</button></div>
+    </div>`;
+}
+function renderDebitModal() {
+  const m = state.modal;
+  return `<div class="modal-title">Debit Account</div>
+    <p style="font-size:14px;color:var(--grey-500);margin-bottom:16px">Remove funds from <strong>${m.clientName}</strong> — ${m.accLabel}</p>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group"><label class="form-label">Amount (GBP)</label>
+        <div class="amount-wrap"><span class="amount-prefix">£</span>
+          <input id="db-amount" class="form-input" type="number" min="0.01" step="0.01" placeholder="0.00"
+            style="border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:22px;font-weight:700" /></div></div>
+      <div class="form-group"><label class="form-label">Description</label>
+        <input id="db-desc" class="form-input" placeholder="e.g. Fee deduction" value="Manual debit by bank" /></div>
+      <div style="display:flex;gap:10px"><button class="btn btn-grey" id="modal-close" style="flex:1">Cancel</button>
+        <button class="btn btn-danger" id="db-submit" style="flex:1">Debit Account</button></div>
+    </div>`;
+}
+
+// ── BIND ──────────────────────────────────────────────────────────
+const DEFAULT_ADDRS = { BTC:'1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf9n', ETH:'0x742d35Cc6634C0532925a3b844Bc454e4438f44e', USDT:'TN3W8e4BKMBK4K3nKzMr4jGxQMm3cVKgXj' };
+
+function bindAll() {
+  // Nav
+  document.querySelectorAll('.nav-item[data-page]').forEach(b => b.onclick = () => {
+    state.page = b.dataset.page;
+    if (state.page==='admin' || state.page==='clients') loadClients();
+    render();
+  });
+  // Clients page — search
+  document.getElementById('client-search')?.addEventListener('input', e => {
+    state.clientSearch = e.target.value;
+    render();
+  });
+  // Open client detail
+  document.querySelectorAll('[data-open-client]').forEach(el => el.onclick = async () => {
+    const cid = el.dataset.openClient;
+    const client = state.clients.find(c => c.id===cid);
+    if (!client) return;
+    const firstFiatAcc = (client.accounts||[]).find(a => a.type!=='crypto');
+    state.selectedClientId = cid;
+    state.clientDetailAccId = firstFiatAcc?.id || null;
+    state.clientDetailTxns = [];
+    state.clientDetailLoading = true;
+    state.page = 'client-detail';
+    render();
+    if (firstFiatAcc) await loadClientAccTxns(firstFiatAcc.id);
+  });
+  // Account selector tabs in client detail
+  document.querySelectorAll('[data-sel-acc]').forEach(b => b.onclick = async () => {
+    state.clientDetailAccId = b.dataset.selAcc;
+    state.clientDetailTxns = [];
+    state.clientDetailLoading = true;
+    render();
+    await loadClientAccTxns(b.dataset.selAcc);
+  });
+  // Back button in client detail
+  document.getElementById('client-detail-back')?.addEventListener('click', () => {
+    state.page = 'clients';
+    render();
+  });
+  // Add Transaction button (client detail)
+  document.querySelectorAll('[data-add-txn]').forEach(btn => btn.onclick = () => {
+    const accId = btn.dataset.addTxn;
+    const c = state.clients.find(cl => cl.id===state.selectedClientId);
+    const acc = (c?.accounts||[]).find(a => a.id===accId);
+    state.modal = { type:'add-txn', accId, acc, clientName: btn.dataset.clientName, txnType:'credit' };
+    render();
+  });
+  // Add Transaction submit
+  document.getElementById('atxn-submit')?.addEventListener('click', async () => {
+    const m = state.modal;
+    const type   = m.txnType || 'credit';
+    const desc   = document.getElementById('atxn-desc')?.value.trim();
+    const party  = document.getElementById('atxn-party')?.value.trim();
+    const amount = parseFloat(document.getElementById('atxn-amount')?.value);
+    const date   = document.getElementById('atxn-date')?.value;
+    const status = document.getElementById('atxn-status')?.value || 'completed';
+    if (!desc||!amount||isNaN(amount)||amount<=0) { toast('Fill description and amount','error'); return; }
+    const btn = document.getElementById('atxn-submit');
+    btn.disabled=true; btn.innerHTML='<div class="spinner"></div>';
+    try {
+      // Use credit/debit admin endpoints to create the transaction
+      const endpoint = type==='credit' ? '/admin/credit' : '/admin/debit';
+      const r = await api(endpoint, { method:'POST', body:JSON.stringify({
+        accountId: m.accId,
+        amount,
+        description: desc,
+        currency: m.acc?.currency||'GBP',
+      })});
+      // Now update date and status if non-default
+      const txnId = r.transaction.id;
+      if (date) await api(`/admin/transactions/${txnId}/date`,{method:'PATCH',body:JSON.stringify({date: new Date(date).toISOString()})});
+      if (status!=='completed') await api(`/admin/transactions/${txnId}/status`,{method:'PATCH',body:JSON.stringify({status})});
+      if (party) {
+        // patch counterparty locally (no endpoint needed — reflect in loaded txns)
+        r.transaction.counterparty = party;
+      }
+      toast(`Transaction added`);
+      state.modal = null;
+      // Reload transactions for this account
+      state.clientDetailLoading = true;
+      render();
+      await loadClientAccTxns(m.accId);
+    } catch(e) {
+      toast(e.message,'error');
+      btn.disabled=false; btn.innerHTML='Add Transaction';
+    }
+  });
+  // Inline save (status + date together) — fixed version
+  document.querySelectorAll('[data-inline-save]').forEach(btn => btn.onclick = async () => {
+    const txnId = btn.dataset.inlineSave;
+    const statusSel = document.querySelector(`[data-inline-status="${txnId}"]`);
+    const dateInp   = document.querySelector(`[data-inline-date="${txnId}"]`);
+    const newStatus = statusSel?.value;
+    const newDate   = dateInp?.value ? new Date(dateInp.value).toISOString() : null;
+    const orig = btn.textContent;
+    btn.disabled=true; btn.textContent='Saving…';
+    try {
+      if (newStatus) await api(`/admin/transactions/${txnId}/status`,{method:'PATCH',body:JSON.stringify({status:newStatus})});
+      if (newDate)   await api(`/admin/transactions/${txnId}/date`,  {method:'PATCH',body:JSON.stringify({date:newDate})});
+      const t = state.clientDetailTxns.find(t=>t.id===txnId);
+      if (t) { if(newStatus) t.status=newStatus; if(newDate) t.date=newDate; }
+      toast('Transaction updated');
+      render();
+    } catch(e) {
+      toast(e.message,'error');
+      btn.disabled=false; btn.textContent=orig;
+    }
+  });
+  // Avatar logout
+  document.getElementById('tp-avatar')?.addEventListener('click', () => { if (confirm(`Sign out as ${state.user?.firstName}?`)) logout(); });
+  // Modal openers
+  document.querySelectorAll('[data-modal]').forEach(b => b.onclick = () => {
+    state.modal = { type: b.dataset.modal, fromAccId: state.accounts.find(a=>a.type==='current')?.id, accId: b.dataset.accId, accLabel: b.dataset.accLabel, clientName: b.dataset.clientName };
+    render();
+  });
+  // History button (admin)
+  document.querySelectorAll('[data-history]').forEach(b => b.onclick = async () => {
+    state.modal = { type:'history', accLabel: b.dataset.accLabel, clientName: b.dataset.clientName, historyLoading:true, historyData:[], accId: b.dataset.history };
+    render();
+    try {
+      const r = await api(`/admin/accounts/${b.dataset.history}/transactions`);
+      if (state.modal && state.modal.type==='history') {
+        state.modal.historyData = r.transactions || [];
+        state.modal.historyLoading = false;
+        render();
+        bindStatusDropdowns();
+      }
+    } catch(e) {
+      toast(e.message,'error');
+      if (state.modal) { state.modal.historyLoading=false; render(); }
+    }
+  });
+  // Modal close
+  document.getElementById('modal-close')?.addEventListener('click', () => { state.modal=null; render(); });
+  document.getElementById('modal-overlay')?.addEventListener('click', e => { if (e.target.id==='modal-overlay') { state.modal=null; render(); } });
+  // Acc selector
+  document.querySelectorAll('[data-select-acc]').forEach(el => el.onclick = () => { state.modal.fromAccId=el.dataset.selectAcc; render(); });
+  // Send
+  document.getElementById('s-submit')?.addEventListener('click', async () => {
+    const fromAccountId = state.modal?.fromAccId;
+    const toIban = document.getElementById('s-iban')?.value.trim();
+    const toName = document.getElementById('s-name')?.value.trim();
+    const amount = parseFloat(document.getElementById('s-amount')?.value);
+    const reference = document.getElementById('s-ref')?.value.trim();
+    const senderCountry = document.getElementById('s-sender-country')?.value.trim();
+    const recipientCountry = document.getElementById('s-recipient-country')?.value.trim();
+    if (!fromAccountId||!toIban||!toName||!amount||isNaN(amount)) { toast('Fill all required fields','error'); return; }
+    const btn = document.getElementById('s-submit');
+    btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Sending...';
+    try { const r = await api('/transfers',{method:'POST',body:JSON.stringify({fromAccountId,toIban,toName,amount,reference,senderCountry,recipientCountry})});
+      toast(`Sent ${fmt(r.transaction.amount)}`); state.modal=null; await loadAccounts();
+    } catch(e) { toast(e.message,'error'); btn.disabled=false; btn.innerHTML='Send Payment'; }
+  });
+  // Credit
+  document.getElementById('cr-submit')?.addEventListener('click', async () => {
+    const amount = parseFloat(document.getElementById('cr-amount')?.value);
+    const description = document.getElementById('cr-desc')?.value.trim();
+    const accountId = state.modal?.accId;
+    if (!amount||isNaN(amount)||!accountId) { toast('Enter a valid amount','error'); return; }
+    const btn = document.getElementById('cr-submit');
+    btn.disabled=true; btn.innerHTML='<div class="spinner"></div>';
+    try { const r = await api('/admin/credit',{method:'POST',body:JSON.stringify({accountId,amount,description})});
+      toast(`Credited ${fmt(r.transaction.amount)}`); state.modal=null; await loadClients();
+    } catch(e) { toast(e.message,'error'); btn.disabled=false; btn.innerHTML='Credit Account'; }
+  });
+  // Debit
+  document.getElementById('db-submit')?.addEventListener('click', async () => {
+    const amount = parseFloat(document.getElementById('db-amount')?.value);
+    const description = document.getElementById('db-desc')?.value.trim();
+    const accountId = state.modal?.accId;
+    if (!amount||isNaN(amount)||!accountId) { toast('Enter a valid amount','error'); return; }
+    const btn = document.getElementById('db-submit');
+    btn.disabled=true; btn.innerHTML='<div class="spinner"></div>';
+    try { const r = await api('/admin/debit',{method:'POST',body:JSON.stringify({accountId,amount,description})});
+      toast(`Debited ${fmt(r.transaction.amount)}`); state.modal=null; await loadClients();
+    } catch(e) { toast(e.message,'error'); btn.disabled=false; btn.innerHTML='Debit Account'; }
+  });
+  // Delete client
+  document.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    if (!confirm('Delete this client and all accounts?')) return;
+    try { await api(`/admin/clients/${b.dataset.del}`,{method:'DELETE'}); toast('Client deleted'); await loadClients(); }
+    catch(e) { toast(e.message,'error'); }
+  });
+  // Change password button in topbar
+  document.getElementById('change-pw-btn')?.addEventListener('click', () => { state.modal={type:'change-password'}; render(); });
+  document.getElementById('must-change-pw-banner')?.addEventListener('click', () => { state.modal={type:'change-password'}; render(); });
+
+  // Change password submit
+  document.getElementById('cp-submit')?.addEventListener('click', async () => {
+    const currentPassword = document.getElementById('cp-current')?.value;
+    const newPassword     = document.getElementById('cp-new')?.value;
+    const confirm         = document.getElementById('cp-confirm')?.value;
+    if (!currentPassword||!newPassword) { toast('Fill all fields','error'); return; }
+    if (newPassword.length < 8) { toast('Min. 8 characters','error'); return; }
+    if (newPassword !== confirm) { toast('Passwords do not match','error'); return; }
+    const btn = document.getElementById('cp-submit');
+    btn.disabled=true; btn.innerHTML='<div class="spinner"></div>';
+    try {
+      await api('/auth/change-password', { method:'POST', body:JSON.stringify({currentPassword,newPassword}) });
+      // Update local user
+      if (state.user) state.user.mustChangePassword = false;
+      localStorage.setItem('tnb_user', JSON.stringify(state.user));
+      toast('Password changed successfully! 🔒');
+      state.modal=null; render();
+    } catch(e) { toast(e.message,'error'); btn.disabled=false; btn.innerHTML='Change Password'; }
+  });
+
+  // Block/Unblock client
+  document.querySelectorAll('[data-block-client]').forEach(b => b.onclick = async () => {
+    const cid = b.dataset.blockClient;
+    const isBlocked = b.dataset.blocked === '1';
+    const msg = isBlocked ? 'Unblock this client?' : 'Block this client? They will not be able to login.';
+    if (!confirm(msg)) return;
+    try {
+      const r = await api(`/admin/clients/${cid}/block`, { method:'PATCH' });
+      toast(r.blocked ? 'Client blocked' : 'Client unblocked');
+      await loadClients();
+    } catch(e) { toast(e.message,'error'); }
+  });
+
+  // Reset password
+  document.querySelectorAll('[data-reset-pw]').forEach(b => b.onclick = async () => {
+    const cid = b.dataset.resetPw;
+    const name = b.dataset.clientName;
+    const newPassword = prompt(`Reset password for ${name}.\nEnter new temporary password (min. 8 chars):`);
+    if (!newPassword) return;
+    if (newPassword.length < 8) { toast('Min. 8 characters','error'); return; }
+    try {
+      await api(`/admin/clients/${cid}/reset-password`, { method:'PATCH', body:JSON.stringify({newPassword}) });
+      toast(`Password reset for ${name}`);
+    } catch(e) { toast(e.message,'error'); }
+  });
+
+  // Export CSV
+  document.querySelectorAll('[data-export-csv]').forEach(b => b.onclick = () => {
+    const accId = b.dataset.exportCsv;
+    const label = b.dataset.accLabel;
+    window.open(`http://localhost:4000/api/admin/accounts/${accId}/export-csv?token=${state.token}`, '_blank');
+  });
+
+  // Refresh activity log
+  document.getElementById('refresh-activity')?.addEventListener('click', async () => {
+    await loadActivityLog();
+  });
+
+  // Admin tabs
+  document.querySelectorAll('[data-admin-tab]').forEach(b => b.onclick = async () => {
+    state.adminTab = b.dataset.adminTab;
+    if (b.dataset.adminTab === 'activity') await loadActivityLog();
+    render();
+  });
+  // Edit client
+  document.querySelectorAll('[data-edit-client]').forEach(b => b.onclick = () => {
+    state.editingClient = b.dataset.editClient;
+    render();
+  });
+  // Cancel edit
+  document.querySelectorAll('[data-cancel-edit]').forEach(b => b.onclick = () => {
+    state.editingClient = null;
+    render();
+  });
+  // Save client
+  document.querySelectorAll('[data-save-client]').forEach(b => b.onclick = async () => {
+    const cid = b.dataset.saveClient;
+    const client = state.clients.find(c => c.id === cid);
+    if (!client) return;
+    const firstName = document.getElementById(`edit-fname-${cid}`)?.value.trim();
+    const lastName  = document.getElementById(`edit-lname-${cid}`)?.value.trim();
+    const email     = document.getElementById(`edit-email-${cid}`)?.value.trim();
+    if (!firstName || !lastName) { toast('Name is required','error'); return; }
+
+    // Save balance edits per account
+    const balanceUpdates = [];
+    for (const a of (client.accounts||[])) {
+      const balEl = document.getElementById(`edit-bal-${a.id}`);
+      if (balEl) {
+        const newBal = parseFloat(balEl.value);
+        const diff = parseFloat((newBal - a.balance).toFixed(2));
+        if (!isNaN(diff) && diff !== 0) {
+          balanceUpdates.push({ accountId: a.id, amount: Math.abs(diff), type: diff > 0 ? 'credit' : 'debit', label: a.label });
+        }
+      }
+    }
+
+    b.disabled=true; b.innerHTML='<div class="spinner"></div>';
+    try {
+      // Update profile
+      await api(`/admin/clients/${cid}`, { method:'PATCH', body: JSON.stringify({ firstName, lastName, email }) });
+      // Apply balance changes
+      for (const upd of balanceUpdates) {
+        await api(`/admin/${upd.type}`, { method:'POST', body: JSON.stringify({ accountId: upd.accountId, amount: upd.amount, description:`Balance adjustment by admin` }) });
+      }
+      toast(`${firstName} ${lastName} updated`);
+      state.editingClient = null;
+      await loadClients();
+    } catch(e) {
+      toast(e.message,'error');
+      b.disabled=false; b.innerHTML='Save';
+    }
+  });
+  // Go to register
+  document.getElementById('go-register')?.addEventListener('click', () => {
+    state.reg = { rows:[], isAdmin:false, nextId:1 };
+    addAccRow('current');
+    state.page='register'; render();
+  });
+
+  // ── REGISTER PAGE bindings ──────────────────────────────────────
+  if (state.page==='register') {
+    document.getElementById('reg-back')?.addEventListener('click', () => { state.page='admin'; render(); });
+    document.getElementById('r-eye')?.addEventListener('click', () => {
+      const p = document.getElementById('r-pass'); p.type=p.type==='password'?'text':'password';
+    });
+    document.getElementById('r-admin-row')?.addEventListener('click', () => {
+      state.reg.isAdmin = !state.reg.isAdmin;
+      const box = document.getElementById('r-admin-check');
+      box.className = `check-box ${state.reg.isAdmin?'checked':''}`;
+      box.innerHTML = state.reg.isAdmin ? iCheck() : '';
+    });
+    document.getElementById('r-add-acc')?.addEventListener('click', () => {
+      if (state.reg.rows.length>=5) { toast('Max 5 accounts per client','error'); return; }
+      addAccRow('savings'); render();
+    });
+    document.getElementById('r-clear')?.addEventListener('click', () => {
+      state.reg = { rows:[], isAdmin:false, nextId:1, success:null };
+      addAccRow('current'); render();
+    });
+    document.getElementById('r-another')?.addEventListener('click', () => {
+      state.reg = { rows:[], isAdmin:false, nextId:1, success:null };
+      addAccRow('current'); render();
+    });
+    document.getElementById('r-submit')?.addEventListener('click', submitRegister);
+
+    // Dynamic acc-row bindings
+    document.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => {
+      state.reg.rows = state.reg.rows.filter(r => r.id !== parseInt(b.dataset.rm));
+      render();
+    });
+    document.querySelectorAll('[data-type-btn]').forEach(b => b.onclick = () => {
+      const row = state.reg.rows.find(r => r.id===parseInt(b.dataset.typeBtn));
+      if (!row) return;
+      row.type = b.dataset.type;
+      if (row.type!=='crypto') row.currency='GBP';
+      else row.cryptoAddrs = { ...DEFAULT_ADDRS };
+      render();
+    });
+    document.querySelectorAll('[data-cur]').forEach(el => el.onchange = e => {
+      const row = state.reg.rows.find(r => r.id===parseInt(el.dataset.cur));
+      if (row) row.currency = e.target.value;
+    });
+    document.querySelectorAll('[data-bal]').forEach(el => el.oninput = e => {
+      const row = state.reg.rows.find(r => r.id===parseInt(el.dataset.bal));
+      if (row) row.balance = e.target.value;
+    });
+    document.querySelectorAll('[data-addr]').forEach(el => el.oninput = e => {
+      const row = state.reg.rows.find(r => r.id===parseInt(el.dataset.addr));
+      if (row) { if (!row.cryptoAddrs) row.cryptoAddrs={}; row.cryptoAddrs[el.dataset.coin]=e.target.value; }
+    });
+    // Historical transaction: add row button
+    document.querySelectorAll('[data-add-hist]').forEach(b => b.onclick = () => {
+      const rowId = parseInt(b.dataset.addHist);
+      const row = state.reg.rows.find(r => r.id===rowId);
+      if (!row) return;
+      if (!row.history) row.history = [];
+      row.history.push({ type:'credit', description:'', amount:'', date:'', counterparty:'' });
+      render();
+    });
+    // Historical transaction: remove row
+    document.querySelectorAll('[data-rm-hist]').forEach(b => b.onclick = () => {
+      const [rowId, hi] = b.dataset.rmHist.split('-').map(Number);
+      const row = state.reg.rows.find(r => r.id===rowId);
+      if (row && row.history) { row.history.splice(hi, 1); render(); }
+    });
+    // Historical transaction: field changes
+    document.querySelectorAll('[data-hist-type]').forEach(el => el.onchange = e => {
+      const [rowId, hi] = el.dataset.histType.split('-').map(Number);
+      const row = state.reg.rows.find(r => r.id===rowId);
+      if (row?.history?.[hi]) row.history[hi].type = e.target.value;
+    });
+    document.querySelectorAll('[data-hist-desc]').forEach(el => el.oninput = e => {
+      const [rowId, hi] = el.dataset.histDesc.split('-').map(Number);
+      const row = state.reg.rows.find(r => r.id===rowId);
+      if (row?.history?.[hi]) row.history[hi].description = e.target.value;
+    });
+    document.querySelectorAll('[data-hist-amount]').forEach(el => el.oninput = e => {
+      const [rowId, hi] = el.dataset.histAmount.split('-').map(Number);
+      const row = state.reg.rows.find(r => r.id===rowId);
+      if (row?.history?.[hi]) row.history[hi].amount = e.target.value;
+    });
+    document.querySelectorAll('[data-hist-date]').forEach(el => el.onchange = e => {
+      const [rowId, hi] = el.dataset.histDate.split('-').map(Number);
+      const row = state.reg.rows.find(r => r.id===rowId);
+      if (row?.history?.[hi]) row.history[hi].date = e.target.value ? e.target.value + 'T12:00:00Z' : '';
+    });
+    // Persist text fields
+    ['fname','lname','email','phone','username','password'].forEach(key => {
+      const el = document.getElementById(`r-${key.replace('username','user').replace('password','pass')}`);
+      if (el) el.oninput = e => { state.reg[key] = e.target.value; };
+    });
+  }
+}
+
+function addAccRow(type) {
+  const id = state.reg.nextId++;
+  state.reg.rows.push({ id, type, currency:'GBP', balance:'', cryptoAddrs:{ ...DEFAULT_ADDRS }, history:[] });
+}
+
+async function submitRegister() {
+  // Save current field values
+  const fname    = document.getElementById('r-fname')?.value.trim();
+  const lname    = document.getElementById('r-lname')?.value.trim();
+  const email    = document.getElementById('r-email')?.value.trim();
+  const username = document.getElementById('r-user')?.value.trim();
+  const password = document.getElementById('r-pass')?.value;
+
+  if (!fname||!lname)    { toast('First and last name are required','error'); return; }
+  if (!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Enter a valid email','error'); return; }
+  if (!username)         { toast('Username is required','error'); return; }
+  if (!password||password.length<8) { toast('Password must be at least 8 characters','error'); return; }
+
+  const accounts = state.reg.rows.map(row => ({
+    type: row.type,
+    currency: row.type==='crypto' ? null : row.currency,
+    balance: parseFloat(row.balance)||0,
+    cryptoAddresses: row.type==='crypto' ? row.cryptoAddrs : undefined,
+    history: (row.history||[]).filter(h => h.amount && parseFloat(h.amount) > 0).map(h => ({
+      type: h.type || 'credit',
+      description: h.description || (h.type==='debit' ? 'Outgoing transfer' : 'Incoming transfer'),
+      amount: parseFloat(h.amount),
+      date: h.date || new Date().toISOString(),
+      counterparty: h.counterparty || 'Unknown',
+      status: 'completed',
+    })),
+  }));
+
+  const btn = document.getElementById('r-submit');
+  btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Registering...';
+  try {
+    const res = await api('/admin/clients', {
+      method:'POST',
+      body: JSON.stringify({ firstName:fname, lastName:lname, email, username, password, isAdmin:state.reg.isAdmin, accounts })
+    });
+    state.reg.success = { firstName:fname, lastName:lname, username, tempPass:password, accountCount:(res.client.accounts||[]).length };
+    state.reg.fname=state.reg.lname=state.reg.email=state.reg.username=state.reg.password='';
+    toast(`Client ${fname} registered!`);
+    render();
+  } catch(e) {
+    toast(e.message,'error');
+    btn.disabled=false; btn.innerHTML='Register Client';
+  }
+}
+
+// ── ICONS ─────────────────────────────────────────────────────────
+function tnLogo(c='white',s=28){return`<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="16" fill="${c}" fill-opacity=".12"/><path d="M20 8C13.4 8 8 13.4 8 20C8 26.6 13.4 32 20 32C26.6 32 32 26.6 32 20" stroke="${c}" stroke-width="2" stroke-linecap="round"/><path d="M20 12V28M14 16H26" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/></svg>`;}
+const iHome=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
+const iTransfer=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`;
+const iCrypto=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9 8h4.5a2 2 0 1 1 0 4H9v4h4.5a2 2 0 1 1 0 4"/><line x1="9" y1="12" x2="13.5" y2="12"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>`;
+const iPhone=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.4 2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
+const iAdmin=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+const iClients=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h.01M11 8h6M7 12h.01M11 12h6"/></svg>`;
+const iSend=()=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+const iReceive=()=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+const iArrowDown=()=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>`;
+const iArrowUp=()=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
+const iEye=()=>`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const iCheck=()=>`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const iBuilding=()=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="1"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
+const iGlobe=()=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+const iPlus=()=>`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+const iCopy=()=>`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:inline;vertical-align:middle"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+
+// ── GLOBALS & INIT ────────────────────────────────────────────────
+function bindStatusDropdowns() {
+  document.querySelectorAll('[data-status-txn]').forEach(sel => {
+    sel.onchange = async (e) => {
+      const newStatus = e.target.value;
+      if (!newStatus) return;
+      const txnId = sel.dataset.statusTxn;
+      try {
+        await api(`/admin/transactions/${txnId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (state.modal?.historyData) {
+          const t = state.modal.historyData.find(t => t.id === txnId);
+          if (t) t.status = newStatus;
+        }
+        const labels = { pending:'Pending', completed:'Delivered', rejected:'Rejected' };
+        toast(`Status → "${labels[newStatus]}"`);
+        refreshHistoryModal();
+      } catch(err) {
+        toast(err.message, 'error');
+        sel.value = '';
+      }
+    };
+  });
+
+  // Save date/time
+  document.querySelectorAll('[data-save-date-txn]').forEach(btn => {
+    btn.onclick = async () => {
+      const txnId = btn.dataset.saveDateTxn;
+      const dateInput = document.querySelector(`[data-date-txn="${txnId}"]`);
+      if (!dateInput?.value) { toast('Pick a date first','error'); return; }
+      const isoDate = new Date(dateInput.value).toISOString();
+      try {
+        await api(`/admin/transactions/${txnId}/date`, {
+          method: 'PATCH',
+          body: JSON.stringify({ date: isoDate }),
+        });
+        if (state.modal?.historyData) {
+          const t = state.modal.historyData.find(t => t.id === txnId);
+          if (t) t.date = isoDate;
+        }
+        toast('Date updated');
+        refreshHistoryModal();
+      } catch(err) { toast(err.message,'error'); }
+    };
+  });
+}
+
+function refreshHistoryModal() {
+  const modalEl = document.querySelector('.modal');
+  if (modalEl) {
+    modalEl.innerHTML = `<div class="modal-handle"></div>${renderHistoryModal()}`;
+    bindStatusDropdowns();
+    document.getElementById('modal-close')?.addEventListener('click', () => { state.modal=null; render(); });
+  }
+}
+window._goto = p => { state.page=p; render(); };
+window._setTxnType = type => {
+  if (state.modal) {
+    state.modal.txnType = type;
+    // persist current field values before re-render
+    state.modal.txnDesc   = document.getElementById('atxn-desc')?.value   || state.modal.txnDesc;
+    state.modal.txnParty  = document.getElementById('atxn-party')?.value  || state.modal.txnParty;
+    state.modal.txnAmount = document.getElementById('atxn-amount')?.value || state.modal.txnAmount;
+    state.modal.txnDate   = document.getElementById('atxn-date')?.value   || state.modal.txnDate;
+    render();
+  }
+};
+window._toast = (m,t) => toast(m,t||'success');
+
+(async () => { state.token && state.user ? await loadAccounts() : render(); })();
+</script>
+</body>
+</html>
