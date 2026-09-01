@@ -14,10 +14,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: { error: 'Too many requests' } });
+const limiter = rateLimit({ windowMs: 15*60*1000, max: 100, message: { error: 'Too many requests' } });
 app.use('/api/', limiter);
-
-const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: { error: 'Too many login attempts' } });
+const loginLimiter = rateLimit({ windowMs: 15*60*1000, max: 10, message: { error: 'Too many login attempts' } });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -27,16 +26,8 @@ app.use('/api/accounts', require('./routes/accounts'));
 app.use('/api/transfers', require('./routes/transfers'));
 app.use('/api/admin', require('./routes/admin'));
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' });
-});
-
+app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' }));
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
+app.use((err, req, res, next) => { console.error(err); res.status(500).json({ error: 'Internal server error' }); });
 
-app.listen(PORT, () => {
-  console.log(`\n🏦 Trusted Novus Bank API running on http://localhost:${PORT}\n`);
-});
+app.listen(PORT, () => console.log(`\n🏦 Trusted Novus Bank API running on port ${PORT}\n`));
