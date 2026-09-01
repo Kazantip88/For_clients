@@ -7,6 +7,8 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(cors({
   origin: '*',
@@ -27,7 +29,16 @@ app.use('/api/transfers', require('./routes/transfers'));
 app.use('/api/admin', require('./routes/admin'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' }));
+app.get('/api/migrate', async (req, res) => {
+  try {
+    await require('./migrate-run')();
+    res.json({ message: 'Migration complete' });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 app.use((err, req, res, next) => { console.error(err); res.status(500).json({ error: 'Internal server error' }); });
 
-app.listen(PORT, () => console.log(`\n🏦 Trusted Novus Bank API running on port ${PORT}\n`));
+// Run migration on startup
+require('./migrate-run')().then(() => {
+  app.listen(PORT, () => console.log(`\n🏦 Trusted Novus Bank API running on port ${PORT}\n`));
+}).catch(e => { console.error('Migration failed:', e.message); process.exit(1); });
