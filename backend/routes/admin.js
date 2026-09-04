@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const auth = require('../middleware/auth');
 const pool = require('../db');
-const mailer = require('../mailer');
+const tg = require("../telegram");
 
 const VALID_STATUSES = ['pending','completed','rejected'];
 const TYPE_LABELS = { current:'Current Account', savings:'Savings Account', crypto:'Crypto Account' };
@@ -93,7 +93,7 @@ router.post('/clients', auth, adminOnly, async (req, res) => {
     await client.query('COMMIT');
     const { rows: adminRows } = await pool.query(`SELECT * FROM users WHERE id=$1`, [req.user.userId]);
     const adminUser = adminRows[0];
-    mailer.notifyClientRegistered({ firstName, lastName, username, email, accounts: createdAccounts }, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
+    tg.notifyClientRegistered({ firstName, lastName, username, email, accounts: createdAccounts }, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
     await logActivity(userId, 'client_registered', { username }, req.user.userId);
     return res.status(201).json({ message: 'Client registered', client: { id:userId, username, firstName, lastName, email, accounts:createdAccounts } });
   } catch(e) {
@@ -120,7 +120,7 @@ router.patch('/clients/:id/block', auth, adminOnly, async (req, res) => {
   const { blocked, first_name, last_name } = rows[0];
   const { rows: adminRows } = await pool.query(`SELECT * FROM users WHERE id=$1`, [req.user.userId]);
   const adminUser = adminRows[0];
-  mailer.notifyAccountBlocked(`${first_name} ${last_name}`, blocked, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
+  tg.notifyAccountBlocked(`${first_name} ${last_name}`, blocked, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
   await logActivity(req.params.id, blocked?'account_blocked':'account_unblocked', {}, req.user.userId);
   return res.json({ message: blocked?'Client blocked':'Client unblocked', blocked });
 });
@@ -134,7 +134,7 @@ router.patch('/clients/:id/reset-password', auth, adminOnly, async (req, res) =>
   if (!rows[0]) return res.status(404).json({ error: 'Client not found' });
   const { rows: adminRows } = await pool.query(`SELECT * FROM users WHERE id=$1`, [req.user.userId]);
   const adminUser = adminRows[0];
-  mailer.notifyPasswordResetByAdmin(rows[0], `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
+  tg.notifyPasswordResetByAdmin(rows[0], `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
   await logActivity(req.params.id, 'password_reset_by_admin', {}, req.user.userId);
   return res.json({ message: 'Password reset' });
 });
@@ -161,7 +161,7 @@ router.post('/credit', auth, adminOnly, async (req, res) => {
     [txnId, accountId, 'credit', parsed, acc.currency||currency||'GBP', description||'Manual credit by bank', `ADM-CR-${Date.now()}`, 'Trusted Novus Bank', 'completed']);
   const { rows: adminRows } = await pool.query(`SELECT * FROM users WHERE id=$1`, [req.user.userId]);
   const adminUser = adminRows[0];
-  mailer.notifyAdminCredit(acc.client_name, parsed, acc.currency||'GBP', description, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
+  tg.notifyAdminCredit(acc.client_name, parsed, acc.currency||'GBP', description, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
   await logActivity(acc.user_id, 'admin_credit', { amount: parsed, accountId, description }, req.user.userId);
   const { rows: txnRows } = await pool.query(`SELECT * FROM transactions WHERE id=$1`, [txnId]);
   return res.status(201).json({ message: 'Credited', transaction: mapTxn(txnRows[0]), newBalance: parseFloat(acc.balance) });
@@ -184,7 +184,7 @@ router.post('/debit', auth, adminOnly, async (req, res) => {
   const adminUser = adminRows[0];
   const { rows: userRows } = await pool.query(`SELECT first_name, last_name FROM users WHERE id=$1`, [accRows[0].user_id]);
   const clientName = userRows[0] ? `${userRows[0].first_name} ${userRows[0].last_name}` : accountId;
-  mailer.notifyAdminDebit(clientName, parsed, accRows[0].currency||'GBP', description, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
+  tg.notifyAdminDebit(clientName, parsed, accRows[0].currency||'GBP', description, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
   await logActivity(accRows[0].user_id, 'admin_debit', { amount: parsed, accountId, description }, req.user.userId);
   const { rows: txnRows } = await pool.query(`SELECT * FROM transactions WHERE id=$1`, [txnId]);
   return res.status(201).json({ message: 'Debited', transaction: mapTxn(txnRows[0]), newBalance: parseFloat(accRows[0].balance) - parsed });

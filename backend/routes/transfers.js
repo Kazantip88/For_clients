@@ -3,7 +3,7 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const auth = require('../middleware/auth');
 const pool = require('../db');
-const mailer = require('../mailer');
+const tg = require('../telegram');
 
 async function logActivity(userId, action, details = {}) {
   try { await pool.query(`INSERT INTO activity_log (id,user_id,action,details) VALUES ($1,$2,$3,$4)`, [uuidv4(), userId, action, JSON.stringify(details)]); } catch(e) {}
@@ -33,7 +33,7 @@ router.post('/', auth, async (req, res) => {
     const { rows: userRows } = await pool.query(`SELECT * FROM users WHERE id=$1`, [req.user.userId]);
     const user = userRows[0];
     await logActivity(req.user.userId, 'transfer_sent', { amount, currency: cur, toName, toIban });
-    if (user) mailer.notifyTransfer({ firstName: user.first_name, lastName: user.last_name, username: user.username }, amount, cur, toName, toIban).catch(() => {});
+    if (user) tg.notifyTransfer({ firstName: user.first_name, lastName: user.last_name, username: user.username }, amount, cur, toName, toIban).catch(() => {});
 
     const { rows: newAcc } = await pool.query(`SELECT balance FROM accounts WHERE id=$1`, [fromAccountId]);
     return res.status(201).json({ message: 'Transfer completed', newBalance: parseFloat(newAcc[0].balance) });
