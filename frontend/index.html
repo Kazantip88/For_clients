@@ -191,7 +191,7 @@
 <body>
 <div id="root"></div>
 <script type="module">
-const API = 'https://for-clients.onrender.com/api';
+const API = 'http://localhost:4000/api';
 
 // ── STATE ─────────────────────────────────────────────────────────
 const state = {
@@ -1439,7 +1439,7 @@ function bindAll() {
     const btn = document.getElementById('s-submit');
     btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Sending...';
     try { const r = await api('/transfers',{method:'POST',body:JSON.stringify({fromAccountId,toIban,toName,amount,reference,senderCountry,recipientCountry})});
-      toast(`Sent ${fmt(r.transaction.amount)}`); state.modal=null; await loadAccounts();
+      toast(`Transfer completed successfully`); state.modal=null; await loadAccounts();
     } catch(e) { toast(e.message,'error'); btn.disabled=false; btn.innerHTML='Send Payment'; }
   });
   // Credit
@@ -1451,7 +1451,7 @@ function bindAll() {
     const btn = document.getElementById('cr-submit');
     btn.disabled=true; btn.innerHTML='<div class="spinner"></div>';
     try { const r = await api('/admin/credit',{method:'POST',body:JSON.stringify({accountId,amount,description})});
-      toast(`Credited ${fmt(r.transaction.amount)}`); state.modal=null; await loadClients();
+      toast(`Account credited successfully`); state.modal=null; await loadClients();
     } catch(e) { toast(e.message,'error'); btn.disabled=false; btn.innerHTML='Credit Account'; }
   });
   // Debit
@@ -1463,7 +1463,7 @@ function bindAll() {
     const btn = document.getElementById('db-submit');
     btn.disabled=true; btn.innerHTML='<div class="spinner"></div>';
     try { const r = await api('/admin/debit',{method:'POST',body:JSON.stringify({accountId,amount,description})});
-      toast(`Debited ${fmt(r.transaction.amount)}`); state.modal=null; await loadClients();
+      toast(`Account debited successfully`); state.modal=null; await loadClients();
     } catch(e) { toast(e.message,'error'); btn.disabled=false; btn.innerHTML='Debit Account'; }
   });
   // Delete client
@@ -1526,7 +1526,7 @@ function bindAll() {
   document.querySelectorAll('[data-export-csv]').forEach(b => b.onclick = () => {
     const accId = b.dataset.exportCsv;
     const label = b.dataset.accLabel;
-    window.open(`https://for-clients.onrender.com/api/admin/accounts/${accId}/export-csv?token=${state.token}`, '_blank');
+    window.open(`http://localhost:4000/api/admin/accounts/${accId}/export-csv?token=${state.token}`, '_blank');
   });
 
   // Refresh activity log
