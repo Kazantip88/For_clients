@@ -4,18 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Trusted Novus Bank — Online Banking</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Trusted Novus Bank" />
-  <meta name="theme-color" content="#1B4332" />
-  <meta name="application-name" content="Trusted Novus Bank" />
-  <link rel="apple-touch-icon" href="/icon.svg" />
-  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -203,7 +191,7 @@
 <body>
 <div id="root"></div>
 <script type="module">
-const API = 'http://localhost:4000/api';
+const API = 'https://for-clients.onrender.com/api';
 
 // ── STATE ─────────────────────────────────────────────────────────
 const state = {
@@ -392,10 +380,6 @@ function renderTopbar() {
       ${admin ? `<span class="admin-badge">ADMIN</span>` : ''}
     </div>
     <div class="topbar-right">
-      <button id="pwa-install-btn" onclick="window.installPWA()"
-        style="display:none;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:none;color:white;font-size:11px;font-weight:600;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:inherit">
-        📲 Install App
-      </button>
       <button class="btn-ghost" id="change-pw-btn" style="color:rgba(255,255,255,.75);font-size:12px;padding:6px 10px">🔒 Password</button>
       <div class="topbar-avatar" id="tp-avatar">${u ? initials(u) : '?'}</div>
     </div>
@@ -469,17 +453,10 @@ function renderHome() {
   `;
 }
 function renderAccountCard(a) {
-  const statusColors = { active:'#166534,#DCFCE7', blocked:'#991B1B,#FEE2E2', pending:'#92400E,#FEF3C7' };
-  const statusLabels = { active:'Active', blocked:'Blocked', pending:'Under Review' };
-  const st = a.accountStatus || 'active';
-  const [stColor, stBg] = (statusColors[st]||statusColors.active).split(',');
-  const statusBadge = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${stBg};color:${stColor};letter-spacing:.04em">${statusLabels[st]}</span>`;
-
   if (a.type==='crypto') return `
     <div class="account-card crypto" style="margin-bottom:12px">
       <div style="font-size:11px;font-weight:600;opacity:.7;letter-spacing:.1em;text-transform:uppercase">Crypto Account</div>
       <div style="font-size:14px;margin-top:4px;opacity:.9">Digital Assets</div>
-      <div style="margin-top:8px">${statusBadge}</div>
       ${Object.entries(a.cryptoAddresses||{}).map(([coin,addr]) => `
         <div class="crypto-addr-item"><div class="crypto-addr-coin">${coin}</div><div class="crypto-addr-val">${addr}</div></div>`).join('')}
     </div>`;
@@ -487,7 +464,6 @@ function renderAccountCard(a) {
     <div class="account-card ${a.type}" style="margin-bottom:12px">
       <div style="font-size:11px;font-weight:600;opacity:.7;letter-spacing:.1em;text-transform:uppercase">${a.label}</div>
       <div class="account-balance"><span style="font-size:16px;opacity:.8;margin-right:4px">${a.currency}</span>${a.balance.toLocaleString('en-GB',{minimumFractionDigits:2})}</div>
-      <div style="margin-top:8px">${statusBadge}</div>
       <div class="account-iban">${a.iban}</div>
       <div class="account-iban">Sort: ${a.sortCode} · Acc: ${a.accountNumber}</div>
     </div>`;
@@ -1550,7 +1526,7 @@ function bindAll() {
   document.querySelectorAll('[data-export-csv]').forEach(b => b.onclick = () => {
     const accId = b.dataset.exportCsv;
     const label = b.dataset.accLabel;
-    window.open(`http://localhost:4000/api/admin/accounts/${accId}/export-csv?token=${state.token}`, '_blank');
+    window.open(`https://for-clients.onrender.com/api/admin/accounts/${accId}/export-csv?token=${state.token}`, '_blank');
   });
 
   // Refresh activity log
@@ -1857,36 +1833,6 @@ window._toast = (m,t) => toast(m,t||'success');
 
 (async () => { state.token && state.user ? await loadAccounts() : render(); })();
 </script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('SW registered:', reg.scope))
-        .catch(err => console.log('SW error:', err));
-    });
-  }
-
-  // PWA install prompt for Android
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Show install button if user is logged in
-    const btn = document.getElementById('pwa-install-btn');
-    if (btn) btn.style.display = 'flex';
-  });
-
-  window.installPWA = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      const btn = document.getElementById('pwa-install-btn');
-      if (btn) btn.style.display = 'none';
-    }
-    deferredPrompt = null;
-  };
-</script>
 </body>
 </html>
+
