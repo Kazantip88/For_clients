@@ -333,4 +333,17 @@ router.get('/backup', auth, adminOnly, async (req, res) => {
   }
 });
 
+// PATCH /api/admin/accounts/:id/balance — set exact balance
+router.patch('/accounts/:id/balance', auth, adminOnly, async (req, res) => {
+  const bal = parseFloat(req.body.balance);
+  if (isNaN(bal) || bal < 0) return res.status(400).json({ error: 'Balance must be a number >= 0' });
+  const { rows } = await pool.query(
+    `UPDATE accounts SET balance=$1 WHERE id=$2 RETURNING user_id, balance`,
+    [bal.toFixed(2), req.params.id]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'Account not found' });
+  await logActivity(rows[0].user_id, 'balance_set_by_admin', { balance: bal, accountId: req.params.id }, req.user.userId);
+  return res.json({ message: 'Balance updated', balance: parseFloat(rows[0].balance) });
+});
+
 module.exports = router;
