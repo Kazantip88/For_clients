@@ -32,6 +32,7 @@ router.get('/clients', auth, adminOnly, async (req, res) => {
     id: u.id, username: u.username, firstName: u.first_name, lastName: u.last_name,
     email: u.email, isAdmin: u.is_admin, blocked: u.blocked,
     mustChangePassword: u.must_change_password, createdAt: u.created_at,
+    accountStatus: u.account_status || 'active',
     accounts: accounts.filter(a => a.user_id === u.id).map(a => ({
       id: a.id, type: a.type, label: a.label, currency: a.currency,
       balance: parseFloat(a.balance), iban: a.iban,
@@ -123,6 +124,26 @@ router.patch('/clients/:id/block', auth, adminOnly, async (req, res) => {
   tg.notifyAccountBlocked(`${first_name} ${last_name}`, blocked, `${adminUser?.first_name} ${adminUser?.last_name}`).catch(()=>{});
   await logActivity(req.params.id, blocked?'account_blocked':'account_unblocked', {}, req.user.userId);
   return res.json({ message: blocked?'Client blocked':'Client unblocked', blocked });
+});
+
+// PATCH /api/admin/clients/:id/status
+router.patch('/clients/:id/status', auth, adminOnly, async (req, res) => {
+  const { status } = req.body;
+  const VALID = ['active', 'pending', 'blocked'];
+  if (!VALID.includes(status)) return res.status(400).json({ error: 'Status must be: active, pending, or blocked' });
+  if (req.params.id === req.user.userId && status === 'blocked') return res.status(400).json({ error: 'Cannot block yourself' });
+  const blocked = status === 'blocked';
+  const { rows } = await pool.query(
+    `UPDATE users SET account_status=$1, blocked=$2 WHERE id=$3 RETURNING first_name, last_name, account_status`,
+    [status, blocked, req.params.id]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'Client not found' });
+  const { rows: adminRows } = await pool.query(`SELECT * FROM users WHERE id=$1`, [req.user.userId]);
+  const adminUser = adminRows[0];
+  const statusLabels = { active: 'Active', pending: 'Pending Review', blocked: 'Blocked' };
+  tg.send(`📋 <b>Account Status Changed</b>\n👤 ${rows[0].first_name} ${rows[0].last_name}\n🔄 Status: ${statusLabels[status]}\n👮 By: ${adminUser?.first_name} ${adminUser?.last_name}\n🕐 ${new Date().toLocaleString('en-GB')}`).catch(()=>{});
+  await logActivity(req.params.id, 'status_changed', { status }, req.user.userId);
+  return res.json({ message: `Status changed to ${status}`, accountStatus: status });
 });
 
 // PATCH /api/admin/clients/:id/reset-password
@@ -265,6 +286,51 @@ router.get('/accounts/:id/export-csv', (req, res, next) => {
   res.setHeader('Content-Type','text/csv');
   res.setHeader('Content-Disposition',`attachment; filename="account-${req.params.id}.csv"`);
   return res.send([header,...csvRows].join('\n'));
+});
+
+// PATCH /api/admin/accounts/:id/status — change account status
+router.patch('/accounts/:id/status', auth, adminOnly, async (req, res) => {
+  const { status } = req.body;
+  const VALID_ACCOUNT_STATUSES = ['active', 'blocked', 'pending'];
+  if (!VALID_ACCOUNT_STATUSES.includes(status)) {
+    return res.status(400).json({ error: 'Status must be: active, blocked, or pending' });
+  }
+  const { rows } = await pool.query(
+    `UPDATE accounts SET account_status=$1 WHERE id=$2 RETURNING *, (SELECT first_name||' '||last_name FROM users WHERE id=user_id) as client_name`,
+    [status, req.params.id]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'Account not found' });
+  const statusLabels = { active: 'Active', blocked: 'Blocked', pending: 'Under Review' };
+  const { rows: adminRows } = await pool.query(`SELECT * FROM users WHERE id=$1`, [req.user.userId]);
+  const adminUser = adminRows[0];
+  await logActivity(rows[0].user_id, 'account_status_changed', { status, accountId: req.params.id }, req.user.userId);
+  const tg = require('../telegram');
+  tg.send(`📋 <b>Account Status Changed</b>\n👤 ${rows[0].client_name}\n💳 ${rows[0].label}\n📊 Status: ${statusLabels[status]}\n👮 By: ${adminUser?.first_name} ${adminUser?.last_name}\n🕐 ${new Date().toLocaleString('en-GB')}`).catch(() => {});
+  return res.json({ message: 'Status updated', status, account: rows[0] });
+});
+
+// GET /api/admin/backup — full export of users, accounts, transactions, activity
+router.get('/backup', auth, adminOnly, async (req, res) => {
+  try {
+    const [users, accounts, transactions, activity] = await Promise.all([
+      pool.query('SELECT * FROM users ORDER BY created_at'),
+      pool.query('SELECT * FROM accounts'),
+      pool.query('SELECT * FROM transactions ORDER BY date'),
+      pool.query('SELECT * FROM activity_log ORDER BY date'),
+    ]);
+    const backup = {
+      exportedAt: new Date().toISOString(),
+      version: 1,
+      users: users.rows,
+      accounts: accounts.rows,
+      transactions: transactions.rows,
+      activity_log: activity.rows,
+    };
+    return res.json(backup);
+  } catch (e) {
+    console.error('Backup error:', e);
+    return res.status(500).json({ error: 'Backup failed' });
+  }
 });
 
 module.exports = router;
